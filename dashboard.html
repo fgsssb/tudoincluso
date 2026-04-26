@@ -1375,11 +1375,7 @@ async function startRealtime() {
     }
 
     if (!window.supabase) {
-      showToast(
-        "Realtime",
-        "Biblioteca do Supabase não carregou.",
-        "error"
-      );
+      showToast("Realtime", "Biblioteca do Supabase não carregou.", "error");
       return;
     }
 
@@ -1389,11 +1385,11 @@ async function startRealtime() {
     );
 
     realtimeClient
-      .channel("ch_dashboard_realtime")
+      .channel("ch_dashboard_realtime_" + Math.random())
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "ch_realtime_ping"
         },
@@ -1409,15 +1405,11 @@ async function startRealtime() {
           );
         }
       )
-      .subscribe((status) => {
-        console.log("Realtime status:", status);
+      .subscribe((status, err) => {
+        console.log("Realtime status:", status, err || "");
 
         if (status === "SUBSCRIBED") {
-          showToast(
-            "Realtime",
-            "Sincronização em tempo real ativada.",
-            "success"
-          );
+          showToast("Realtime", "Sincronização em tempo real ativada.", "success");
         }
 
         if (
@@ -1425,24 +1417,14 @@ async function startRealtime() {
           status === "TIMED_OUT" ||
           status === "CLOSED"
         ) {
-          showToast(
-            "Realtime",
-            `Erro na conexão realtime: ${status}`,
-            "error"
-          );
+          showToast("Realtime", `Erro na conexão realtime: ${status}`, "error");
         }
       });
   } catch (error) {
     console.error("Erro ao conectar realtime:", error);
-
-    showToast(
-      "Realtime",
-      error.message || "Erro ao conectar realtime.",
-      "error"
-    );
+    showToast("Realtime", error.message || "Erro ao conectar realtime.", "error");
   }
 }
-
     addCardFromContext.addEventListener("click", function () {
       targetColumnForNewCard = activeColumn;
       hideContextMenu();
