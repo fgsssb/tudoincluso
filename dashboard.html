@@ -1397,32 +1397,31 @@ async function startRealtime() {
           console.log("PING REALTIME RECEBIDO:", payload);
 
           await loadBoardFromApi(false);
-
-          showToast(
-            "Quadro atualizado",
-            "Alteração recebida em tempo real.",
-            "success"
-          );
         }
       )
       .subscribe((status, err) => {
         console.log("Realtime status:", status, err || "");
-
-        if (status === "SUBSCRIBED") {
-          showToast("Realtime", "Sincronização em tempo real ativada.", "success");
-        }
 
         if (
           status === "CHANNEL_ERROR" ||
           status === "TIMED_OUT" ||
           status === "CLOSED"
         ) {
-          showToast("Realtime", `Erro na conexão realtime: ${status}`, "error");
+          showToast(
+            "Realtime",
+            `Erro na conexão realtime: ${status}`,
+            "error"
+          );
         }
       });
   } catch (error) {
     console.error("Erro ao conectar realtime:", error);
-    showToast("Realtime", error.message || "Erro ao conectar realtime.", "error");
+
+    showToast(
+      "Realtime",
+      error.message || "Erro ao conectar realtime.",
+      "error"
+    );
   }
 }
     addCardFromContext.addEventListener("click", function () {
