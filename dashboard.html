@@ -240,6 +240,16 @@
     transition: background 0.15s ease, border-color 0.15s ease;
   }
 
+  .kanban-column.column-dragging {
+    opacity: 0.55;
+    transform: scale(0.995);
+  }
+
+  .kanban-column.column-reorder-target {
+    border-color: rgba(88, 101, 242, 0.72);
+    background: #30323a;
+  }
+
   .kanban-column.drag-over {
     border-color: rgba(88, 101, 242, 0.72);
     background: #30323a;
@@ -253,6 +263,11 @@
     padding: 2px 2px 9px;
     margin-bottom: 10px;
     border-bottom: 1px solid var(--border-soft);
+    cursor: grab;
+  }
+
+  .kanban-column-header:active {
+    cursor: grabbing;
   }
 
   .kanban-column-header h2 {
@@ -342,19 +357,19 @@
   }
 
   .date-category-card {
-    border-radius: 10px;
-    padding: 2px 0 0;
-    background: transparent;
-    border: 0;
+    background: #25262b;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    padding: 10px;
   }
 
   .date-category-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    padding: 4px 2px 7px;
-    margin-bottom: 7px;
+    gap: 10px;
+    margin-bottom: 9px;
+    padding-bottom: 9px;
     border-bottom: 1px solid var(--border-soft);
   }
 
@@ -363,15 +378,14 @@
   }
 
   .date-category-title {
-    font-size: 0.86rem;
+    font-size: 0.9rem;
     font-weight: 900;
     color: var(--text-strong);
     margin: 0;
     cursor: text;
-    border-radius: 6px;
+    border-radius: 7px;
     padding: 3px 5px;
     margin-left: -5px;
-    line-height: 1.2;
   }
 
   .date-category-title:hover,
@@ -383,47 +397,39 @@
   .date-category-date {
     display: block;
     color: var(--text-muted);
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     margin-top: 2px;
   }
 
-  .category-add-card {
+  .date-category-icon {
     width: 26px;
     height: 26px;
-    min-width: 26px;
-    border: 0;
-    border-radius: 8px;
+    border-radius: 9px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    color: var(--text-muted);
-    padding: 0;
-    font-size: 0.86rem;
-  }
-
-  .category-add-card:hover,
-  .category-add-card:focus {
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--text-strong);
+    color: #c9cdfb;
+    background: rgba(88, 101, 242, 0.12);
+    border: 0;
+    flex: 0 0 auto;
+    font-size: 0.82rem;
   }
 
   .date-category-dropzone {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-height: 36px;
-    padding-bottom: 6px;
+    min-height: 38px;
     border-radius: var(--radius-md);
     transition: background 0.16s ease, outline 0.16s ease;
   }
 
   .date-category-dropzone:empty::before {
-    content: "Nenhum card nesta categoria";
-    color: rgba(148, 163, 184, 0.58);
-    font-size: 0.74rem;
-    padding: 7px 8px;
-    border: 1px dashed rgba(148, 163, 184, 0.16);
+    content: "Arraste cards para cá";
+    color: rgba(148, 163, 184, 0.62);
+    font-size: 0.76rem;
+    padding: 8px 9px;
+    border: 1px dashed rgba(148, 163, 184, 0.18);
     border-radius: var(--radius-md);
     display: block;
   }
@@ -893,11 +899,6 @@
       Criar categoria de data
     </button>
 
-    <button type="button" class="context-menu-item" id="addTextCategoryFromContext">
-      <i class="bi bi-card-text"></i>
-      Criar categoria de texto
-    </button>
-
     <button type="button" class="context-menu-item context-menu-danger" id="removeColumnFromContext">
       <i class="bi bi-trash"></i>
       Remover coluna
@@ -905,12 +906,7 @@
   </div>
 
   <div id="cardContextMenu" class="context-menu">
-    <div class="context-menu-title" id="cardContextMenuTitle">Ações do card</div>
-
-    <button type="button" class="context-menu-item" id="addCardInsideCategoryFromContext">
-      <i class="bi bi-plus-square"></i>
-      Criar card nesta categoria
-    </button>
+    <div class="context-menu-title">Ações do card</div>
 
     <button type="button" class="context-menu-item context-menu-danger" id="removeCardFromContext">
       <i class="bi bi-trash"></i>
@@ -968,7 +964,7 @@
     <div class="modal-dialog modal-md modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold" id="categoryModalTitle">Criar categoria de data</h5>
+          <h5 class="modal-title fw-bold">Criar categoria de data</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
 
@@ -979,7 +975,7 @@
               <input type="text" class="form-control" id="dateCategoryTitle" placeholder="Ex: Hoje" />
             </div>
 
-            <div class="col-12" id="dateCategoryDateGroup">
+            <div class="col-12">
               <label class="form-label">Data</label>
               <input type="date" class="form-control" id="dateCategoryDate" />
             </div>
@@ -1107,9 +1103,6 @@
     const columnContextMenuTitle = document.getElementById("columnContextMenuTitle");
     const addCardFromContext = document.getElementById("addCardFromContext");
     const addDateCategoryFromContext = document.getElementById("addDateCategoryFromContext");
-    const addTextCategoryFromContext = document.getElementById("addTextCategoryFromContext");
-    const addCardInsideCategoryFromContext = document.getElementById("addCardInsideCategoryFromContext");
-    const cardContextMenuTitle = document.getElementById("cardContextMenuTitle");
     const removeColumnFromContext = document.getElementById("removeColumnFromContext");
     const removeCardFromContext = document.getElementById("removeCardFromContext");
     const kanbanBoard = document.getElementById("kanbanBoard");
@@ -1129,9 +1122,7 @@
     const saveNewColumnBtn = document.getElementById("saveNewColumnBtn");
 
     const dateCategoryForm = document.getElementById("dateCategoryForm");
-    const categoryModalTitle = document.getElementById("categoryModalTitle");
     const dateCategoryTitle = document.getElementById("dateCategoryTitle");
-    const dateCategoryDateGroup = document.getElementById("dateCategoryDateGroup");
     const dateCategoryDate = document.getElementById("dateCategoryDate");
     const saveDateCategoryBtn = document.getElementById("saveDateCategoryBtn");
 
@@ -1160,9 +1151,9 @@
     let activeCard = null;
     let currentCard = null;
     let targetColumnForNewCard = null;
-    let targetCategoryForNewCard = null;
-    let categoryCreationType = "categoria_data";
     let draggedCard = null;
+    let draggedColumn = null;
+    let columnOrderSaveTimer = null;
     let realtimeClient = null;
 
     function showConfirm({ title = "Confirmar ação", message = "Tem certeza que deseja continuar?", confirmText = "Confirmar", danger = true } = {}) {
@@ -1296,11 +1287,6 @@
     function showCardContextMenu(x, y, card) {
       activeCard = card;
       activeColumn = null;
-
-      const isCategory = card.classList.contains("date-category-card");
-      addCardInsideCategoryFromContext.style.display = isCategory ? "flex" : "none";
-      cardContextMenuTitle.textContent = isCategory ? "Ações da categoria" : "Ações do card";
-
       positionMenu(cardContextMenu, x, y);
     }
 
@@ -1486,7 +1472,7 @@
       column.dataset.columnTitle = coluna.titulo;
 
       column.innerHTML = `
-        <div class="kanban-column-header">
+        <div class="kanban-column-header" draggable="true" title="Arraste para mover a coluna">
           <h2>${coluna.titulo}</h2>
           <strong>0</strong>
         </div>
@@ -1499,13 +1485,10 @@
 
     function createDateCategoryElement(card) {
       const article = document.createElement("article");
-      const isDateCategory = card.tipo === "categoria_data";
-
       article.className = "date-category-card";
       article.dataset.cardId = card.id;
       article.dataset.categoryId = card.id;
       article.dataset.colunaId = card.coluna_id;
-      article.dataset.categoryType = card.tipo;
 
       article.innerHTML = `
         <div class="date-category-header">
@@ -1513,28 +1496,20 @@
             <h3 class="date-category-title" title="Clique para editar o título"></h3>
             <span class="date-category-date"></span>
           </div>
-          <button type="button" class="category-add-card" title="Criar card nesta categoria">
-            <i class="bi bi-plus-lg"></i>
-          </button>
+          <span class="date-category-icon"><i class="bi bi-calendar-event"></i></span>
         </div>
         <div class="date-category-dropzone"></div>
       `;
 
       article.querySelector(".date-category-title").textContent = card.titulo;
-
-      const dateLabel = article.querySelector(".date-category-date");
-      if (isDateCategory) {
-        dateLabel.textContent = formatDateBR(card.data_referencia);
-      } else {
-        dateLabel.remove();
-      }
+      article.querySelector(".date-category-date").textContent = formatDateBR(card.data_referencia);
 
       attachDateCategoryEvents(article);
       return article;
     }
 
     function createCardElement(card) {
-      if (card.tipo === "categoria_data" || card.tipo === "categoria_texto") {
+      if (card.tipo === "categoria_data") {
         return createDateCategoryElement(card);
       }
 
@@ -1605,17 +1580,6 @@
     function attachDateCategoryEvents(categoryElement) {
       const titleElement = categoryElement.querySelector(".date-category-title");
       const dropzone = categoryElement.querySelector(".date-category-dropzone");
-      const addButton = categoryElement.querySelector(".category-add-card");
-
-      addButton.addEventListener("click", function (e) {
-        e.stopPropagation();
-        targetColumnForNewCard = document.querySelector(`.kanban-column[data-column-id="${categoryElement.dataset.colunaId}"]`);
-        targetCategoryForNewCard = categoryElement.dataset.categoryId;
-        hideContextMenu();
-        newCardForm.reset();
-        newCardResponsible.value = "";
-        modalNovoCard.show();
-      });
 
       titleElement.addEventListener("click", function (e) {
         e.stopPropagation();
@@ -1715,8 +1679,79 @@
       });
     }
 
+    function clearColumnReorderClasses() {
+      document.querySelectorAll(".kanban-column").forEach((item) => {
+        item.classList.remove("column-reorder-target");
+      });
+    }
+
+    function getColumnOrderPayload() {
+      return [...document.querySelectorAll(".kanban-column")].map((column, index) => ({
+        id: column.dataset.columnId,
+        ordem: index + 1
+      }));
+    }
+
+    async function saveColumnOrder() {
+      const ordens = getColumnOrderPayload().filter((item) => item.id);
+      if (!ordens.length) return;
+
+      try {
+        await apiFetch("/api/colunas", {
+          method: "PATCH",
+          body: JSON.stringify({ ordens })
+        });
+      } catch (error) {
+        showToast("Erro", error.message || "Não foi possível salvar a ordem das colunas.", "error");
+        await loadBoardFromApi(false);
+      }
+    }
+
+    function scheduleColumnOrderSave() {
+      clearTimeout(columnOrderSaveTimer);
+      columnOrderSaveTimer = setTimeout(saveColumnOrder, 250);
+    }
+
+    function handleColumnReorderOver(targetColumn, clientX) {
+      if (!draggedColumn || targetColumn === draggedColumn) return;
+
+      clearColumnReorderClasses();
+      targetColumn.classList.add("column-reorder-target");
+
+      const rect = targetColumn.getBoundingClientRect();
+      const insertAfter = clientX > rect.left + rect.width / 2;
+
+      if (insertAfter) {
+        targetColumn.after(draggedColumn);
+      } else {
+        targetColumn.before(draggedColumn);
+      }
+    }
+
     function attachColumnEvents(column) {
+      const columnHeader = column.querySelector(".kanban-column-header");
       const columnTitle = column.querySelector(".kanban-column-header h2");
+
+      columnHeader.addEventListener("dragstart", function (e) {
+        if (columnTitle.isContentEditable) {
+          e.preventDefault();
+          return;
+        }
+
+        draggedColumn = column;
+        column.classList.add("column-dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", `column:${column.dataset.columnId}`);
+      });
+
+      columnHeader.addEventListener("dragend", function () {
+        if (!draggedColumn) return;
+
+        draggedColumn.classList.remove("column-dragging");
+        draggedColumn = null;
+        clearColumnReorderClasses();
+        scheduleColumnOrderSave();
+      });
 
       columnTitle.addEventListener("click", function (e) {
         e.stopPropagation();
@@ -1783,16 +1818,28 @@
 
       column.addEventListener("dragover", function (e) {
         e.preventDefault();
+
+        if (draggedColumn) {
+          handleColumnReorderOver(column, e.clientX);
+          return;
+        }
+
         column.classList.add("drag-over");
       });
 
       column.addEventListener("dragleave", function () {
+        if (draggedColumn) return;
         column.classList.remove("drag-over");
       });
 
       column.addEventListener("drop", async function (e) {
         e.preventDefault();
         column.classList.remove("drag-over");
+
+        if (draggedColumn) {
+          clearColumnReorderClasses();
+          return;
+        }
 
         if (!draggedCard) return;
 
@@ -1815,6 +1862,27 @@
         }
       });
     }
+
+    kanbanBoard.addEventListener("dragover", function (e) {
+      if (!draggedColumn) return;
+      e.preventDefault();
+
+      const columns = [...kanbanBoard.querySelectorAll(".kanban-column:not(.column-dragging)")];
+      const lastColumn = columns[columns.length - 1];
+
+      if (!lastColumn) return;
+
+      const lastRect = lastColumn.getBoundingClientRect();
+      if (e.clientX > lastRect.left + lastRect.width / 2) {
+        lastColumn.after(draggedColumn);
+      }
+    });
+
+    kanbanBoard.addEventListener("drop", function (e) {
+      if (!draggedColumn) return;
+      e.preventDefault();
+      clearColumnReorderClasses();
+    });
 
     async function loadUsersFromApi() {
       try {
@@ -1865,8 +1933,8 @@
         const columnElement = createColumnElement(coluna);
         const cardsContainer = columnElement.querySelector(".column-cards");
         const cardsDaColuna = cards.filter((card) => card.coluna_id === coluna.id);
-        const categoriasDaColuna = cardsDaColuna.filter((card) => card.tipo === "categoria_data" || card.tipo === "categoria_texto");
-        const cardsNormais = cardsDaColuna.filter((card) => card.tipo !== "categoria_data" && card.tipo !== "categoria_texto");
+        const categoriasDaColuna = cardsDaColuna.filter((card) => card.tipo === "categoria_data");
+        const cardsNormais = cardsDaColuna.filter((card) => card.tipo !== "categoria_data");
 
         categoriasDaColuna.forEach((categoria) => {
           const categoriaElement = createCardElement(categoria);
@@ -1966,7 +2034,6 @@ async function startRealtime() {
 }
     addCardFromContext.addEventListener("click", function () {
       targetColumnForNewCard = activeColumn;
-      targetCategoryForNewCard = null;
       hideContextMenu();
 
       newCardForm.reset();
@@ -1976,47 +2043,17 @@ async function startRealtime() {
 
     addDateCategoryFromContext.addEventListener("click", function () {
       targetColumnForNewCard = activeColumn;
-      targetCategoryForNewCard = null;
-      categoryCreationType = "categoria_data";
       hideContextMenu();
 
-      categoryModalTitle.textContent = "Criar categoria de data";
-      dateCategoryDateGroup.classList.remove("d-none");
       dateCategoryForm.reset();
       dateCategoryTitle.value = "Hoje";
       dateCategoryDate.value = getTodayISO();
       modalCategoriaData.show();
     });
 
-    addTextCategoryFromContext.addEventListener("click", function () {
-      targetColumnForNewCard = activeColumn;
-      targetCategoryForNewCard = null;
-      categoryCreationType = "categoria_texto";
-      hideContextMenu();
-
-      categoryModalTitle.textContent = "Criar categoria de texto";
-      dateCategoryDateGroup.classList.add("d-none");
-      dateCategoryForm.reset();
-      dateCategoryTitle.value = "";
-      dateCategoryDate.value = "";
-      modalCategoriaData.show();
-    });
-
-    addCardInsideCategoryFromContext.addEventListener("click", function () {
-      if (!activeCard || !activeCard.classList.contains("date-category-card")) return;
-
-      targetColumnForNewCard = document.querySelector(`.kanban-column[data-column-id="${activeCard.dataset.colunaId}"]`);
-      targetCategoryForNewCard = activeCard.dataset.categoryId;
-      hideContextMenu();
-
-      newCardForm.reset();
-      newCardResponsible.value = "";
-      modalNovoCard.show();
-    });
-
     saveDateCategoryBtn.addEventListener("click", async function () {
       const titulo = dateCategoryTitle.value.trim();
-      const data_referencia = categoryCreationType === "categoria_data" ? dateCategoryDate.value : null;
+      const data_referencia = dateCategoryDate.value;
 
       if (!targetColumnForNewCard) {
         showToast("Erro", "Nenhuma coluna selecionada para criar a categoria.", "error");
@@ -2029,7 +2066,7 @@ async function startRealtime() {
         return;
       }
 
-      if (categoryCreationType === "categoria_data" && !data_referencia) {
+      if (!data_referencia) {
         showToast("Campo obrigatório", "Preencha a data da categoria.", "error");
         dateCategoryDate.focus();
         return;
@@ -2042,9 +2079,9 @@ async function startRealtime() {
             coluna_id: targetColumnForNewCard.dataset.columnId,
             titulo,
             descricao: "",
-            quem_pediu: "Categoria",
+            quem_pediu: "Categoria de data",
             responsavel_id: null,
-            tipo: categoryCreationType,
+            tipo: "categoria_data",
             data_referencia
           })
         });
@@ -2194,14 +2231,13 @@ async function startRealtime() {
             descricao,
             quem_pediu,
             responsavel_id,
-            categoria_id: targetCategoryForNewCard || null,
+            categoria_id: null,
             tipo: "chamado"
           })
         });
 
         newCardForm.reset();
         newCardResponsible.value = "";
-        targetCategoryForNewCard = null;
         modalNovoCard.hide();
         showToast("Card criado", "O card foi criado na coluna selecionada.", "success");
         await loadBoardFromApi(false);
