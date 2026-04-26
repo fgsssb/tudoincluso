@@ -1,0 +1,3 @@
+const crypto=require('crypto');const {supabase}=require('./_supabase');
+function hash(s){return crypto.createHash('sha256').update(s).digest('hex')}
+module.exports=async(req,res)=>{if(req.method!=='POST')return res.status(405).json({error:'Método inválido'});const {login,senha}=req.body||{};if(!login||!senha)return res.status(400).json({error:'Informe usuário e senha'});try{const sb=supabase();const {data,error}=await sb.from('ti_users').select('id,nome,login,cargo,senha_hash,ativo').eq('login',login).eq('deletado',false).single();if(error||!data||!data.ativo||data.senha_hash!==hash(senha))return res.status(401).json({error:'Usuário ou senha inválidos'});delete data.senha_hash;return res.json({user:data})}catch(e){return res.status(500).json({error:e.message})}}
