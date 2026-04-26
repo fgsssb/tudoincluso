@@ -1,4 +1,3 @@
-const bcrypt = require('bcryptjs');
 const { supabase } = require('./_supabase');
 
 module.exports = async (req, res) => {
@@ -15,27 +14,19 @@ module.exports = async (req, res) => {
 
     const { data, error } = await sb
       .from('ti_users')
-      .select('id,nome,login,cargo,password_hash,ativo')
-      .eq('login', login)
-      .eq('deletado', false)
+      .select('id,nome,login,cargo,senha,ativo,deletado')
+      .eq('login', login.trim().toLowerCase())
       .single();
 
-    if (error || !data || !data.ativo) {
+    if (error || !data || !data.ativo || data.deletado === true || data.senha !== senha) {
       return res.status(401).json({ error: 'Usuário ou senha inválidos' });
     }
 
-    const senhaCorreta = await bcrypt.compare(senha, data.password_hash);
-
-    if (!senhaCorreta) {
-      return res.status(401).json({ error: 'Usuário ou senha inválidos' });
-    }
-
-    delete data.password_hash;
+    delete data.senha;
 
     return res.json({ user: data });
 
   } catch (e) {
-    console.error('ERRO LOGIN:', e);
     return res.status(500).json({ error: e.message });
   }
 };
