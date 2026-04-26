@@ -27,20 +27,11 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     const body = await readJson(req);
     const titulo = String(body.titulo || "").trim();
-    const tipo = body.tipo === "data" ? "data" : "status";
-    const data_referencia = tipo === "data" ? body.data_referencia || null : null;
 
     if (!titulo) {
       return res.status(400).json({
         ok: false,
         message: "Preencha o título da coluna."
-      });
-    }
-
-    if (tipo === "data" && !data_referencia) {
-      return res.status(400).json({
-        ok: false,
-        message: "Selecione a data do grupo."
       });
     }
 
@@ -53,7 +44,7 @@ export default async function handler(req, res) {
     if (existente) {
       return res.status(400).json({
         ok: false,
-        message: "Já existe uma coluna ou grupo com esse título."
+        message: "Já existe uma coluna com esse título."
       });
     }
 
@@ -70,8 +61,6 @@ export default async function handler(req, res) {
       .from("ch_colunas")
       .insert({
         titulo,
-        tipo,
-        data_referencia,
         ordem,
         criado_por: user.id
       })
@@ -81,7 +70,7 @@ export default async function handler(req, res) {
     if (error) {
       return res.status(500).json({
         ok: false,
-        message: "Erro ao criar coluna ou grupo."
+        message: "Erro ao criar coluna."
       });
     }
 
@@ -94,50 +83,32 @@ export default async function handler(req, res) {
   if (req.method === "PATCH") {
     const body = await readJson(req);
     const id = body.id;
-    const titulo = body.titulo !== undefined ? String(body.titulo || "").trim() : undefined;
-    const data_referencia = body.data_referencia !== undefined ? body.data_referencia || null : undefined;
+    const titulo = String(body.titulo || "").trim();
 
-    if (!id) {
+    if (!id || !titulo) {
       return res.status(400).json({
         ok: false,
-        message: "ID da coluna não informado."
+        message: "Dados inválidos."
       });
     }
 
-    const payload = {};
+    const { data: duplicada } = await supabase
+      .from("ch_colunas")
+      .select("id")
+      .ilike("titulo", titulo)
+      .neq("id", id)
+      .maybeSingle();
 
-    if (titulo !== undefined) {
-      if (!titulo) {
-        return res.status(400).json({
-          ok: false,
-          message: "O título não pode ficar vazio."
-        });
-      }
-
-      const { data: duplicada } = await supabase
-        .from("ch_colunas")
-        .select("id")
-        .ilike("titulo", titulo)
-        .neq("id", id)
-        .maybeSingle();
-
-      if (duplicada) {
-        return res.status(400).json({
-          ok: false,
-          message: "Já existe uma coluna ou grupo com esse título."
-        });
-      }
-
-      payload.titulo = titulo;
-    }
-
-    if (data_referencia !== undefined) {
-      payload.data_referencia = data_referencia;
+    if (duplicada) {
+      return res.status(400).json({
+        ok: false,
+        message: "Já existe uma coluna com esse título."
+      });
     }
 
     const { data, error } = await supabase
       .from("ch_colunas")
-      .update(payload)
+      .update({ titulo })
       .eq("id", id)
       .select("*")
       .single();
@@ -178,7 +149,9 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({
+      ok: true
+    });
   }
 
   return res.status(405).json({
