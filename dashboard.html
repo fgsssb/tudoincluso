@@ -10,22 +10,34 @@
 
 <style>
   :root {
-    --bg-main: #1e1f22;
-    --bg-panel: #2b2d31;
-    --bg-panel-2: #313338;
-    --bg-card: #2f3136;
-    --bg-card-hover: #35373c;
-    --bg-input: #1e1f22;
-    --border-color: #3f4147;
-    --border-soft: rgba(255, 255, 255, 0.06);
-    --text-main: #dbdee1;
-    --text-strong: #f2f3f5;
-    --text-muted: #949ba4;
-    --primary: #5865f2;
-    --primary-hover: #4752c4;
-    --success: #23a559;
-    --danger: #f23f42;
-    --danger-soft: rgba(242, 63, 66, 0.14);
+    --bg-main: #15131f;
+    --bg-panel: #211d2e;
+    --bg-panel-2: #2a243a;
+    --bg-card: #272234;
+    --bg-card-hover: #302941;
+    --bg-input: #171421;
+
+    --border-color: #3c334f;
+    --border-soft: rgba(255, 255, 255, 0.07);
+
+    --text-main: #e8e2f5;
+    --text-strong: #ffffff;
+    --text-muted: #a99fbd;
+
+    --primary: #8b5cf6;
+    --primary-hover: #7c3aed;
+
+    --fruit-pink: #fb7185;
+    --fruit-orange: #fb923c;
+    --fruit-yellow: #facc15;
+    --fruit-green: #84cc16;
+    --fruit-blue: #38bdf8;
+    --fruit-purple: #a855f7;
+
+    --success: #22c55e;
+    --danger: #fb7185;
+    --danger-soft: rgba(251, 113, 133, 0.15);
+
     --radius-sm: 8px;
     --radius-md: 10px;
     --radius-lg: 14px;
@@ -44,7 +56,10 @@
 
   body {
     margin: 0;
-    background: var(--bg-main);
+    background:
+      radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 32%),
+      radial-gradient(circle at bottom right, rgba(251, 113, 133, 0.12), transparent 34%),
+      var(--bg-main);
     color: var(--text-main);
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 14px;
@@ -94,8 +109,8 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--bg-panel);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(33, 29, 46, 0.92);
+    border: 1px solid rgba(168, 85, 247, 0.18);
     color: var(--text-strong);
     border-radius: var(--radius-md);
     padding: 0 10px 0 7px;
@@ -103,12 +118,13 @@
     font-weight: 800;
     letter-spacing: 0.01em;
     white-space: nowrap;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
   }
 
   .mini-profile-btn:hover,
   .mini-profile-btn:focus {
     background: var(--bg-panel-2);
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(168, 85, 247, 0.35);
     color: var(--text-strong);
   }
 
@@ -119,9 +135,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(148, 163, 184, 0.14);
-    border: 1px solid rgba(148, 163, 184, 0.22);
-    color: #cbd5e1;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(251, 113, 133, 0.22));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f5f3ff;
     flex: 0 0 auto;
     font-size: 0.8rem;
   }
@@ -132,11 +148,11 @@
 
   .mini-profile-menu,
   .dropdown-menu-dark {
-    background: #111214;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #171421;
+    border: 1px solid rgba(168, 85, 247, 0.16);
     border-radius: var(--radius-md);
     padding: 6px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.42);
   }
 
   .mini-profile-menu .dropdown-item {
@@ -148,7 +164,7 @@
 
   .mini-profile-menu .dropdown-item:hover {
     background: var(--danger-soft);
-    color: #ffb3b4;
+    color: #fecdd3;
   }
 
   .btn-icon-create {
@@ -162,16 +178,16 @@
     border-radius: var(--radius-md);
     padding: 0;
     font-size: 1rem;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--fruit-pink));
     border: 0;
     color: #fff;
     font-weight: 800;
-    box-shadow: none;
+    box-shadow: 0 12px 28px rgba(139, 92, 246, 0.25);
   }
 
   .btn-icon-create:hover,
   .btn-icon-create:focus {
-    background: var(--primary-hover);
+    background: linear-gradient(135deg, var(--primary-hover), #e11d48);
     color: #fff;
     transform: translateY(-1px);
   }
@@ -206,14 +222,14 @@
 
   .kanban-scroll-area::-webkit-scrollbar-thumb,
   .modal-body::-webkit-scrollbar-thumb {
-    background: #3d3f45;
+    background: #4a405f;
     border-radius: 999px;
     border: 2px solid var(--bg-main);
   }
 
   .kanban-scroll-area::-webkit-scrollbar-thumb:hover,
   .modal-body::-webkit-scrollbar-thumb:hover {
-    background: #555861;
+    background: #66547f;
   }
 
   .kanban-board {
@@ -228,8 +244,8 @@
   }
 
   .kanban-column {
-    background: var(--bg-panel);
-    border: 1px solid var(--border-soft);
+    background: rgba(33, 29, 46, 0.92);
+    border: 1px solid rgba(168, 85, 247, 0.11);
     border-radius: var(--radius-lg);
     padding: 10px;
     width: 292px;
@@ -237,22 +253,17 @@
     flex: 0 0 292px;
     min-height: 390px;
     position: relative;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
 
-  .kanban-column.column-dragging {
-    opacity: 0.55;
-    transform: scale(0.995);
-  }
-
-  .kanban-column.column-reorder-target {
-    border-color: rgba(88, 101, 242, 0.72);
-    background: #30323a;
+  .kanban-column:hover {
+    border-color: rgba(168, 85, 247, 0.22);
   }
 
   .kanban-column.drag-over {
-    border-color: rgba(88, 101, 242, 0.72);
-    background: #30323a;
+    border-color: rgba(251, 113, 133, 0.75);
+    background: #282238;
   }
 
   .kanban-column-header {
@@ -262,18 +273,13 @@
     gap: 8px;
     padding: 2px 2px 9px;
     margin-bottom: 10px;
-    border-bottom: 1px solid var(--border-soft);
-    cursor: grab;
-  }
-
-  .kanban-column-header:active {
-    cursor: grabbing;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   }
 
   .kanban-column-header h2 {
     font-size: 0.88rem;
     line-height: 1.2;
-    font-weight: 800;
+    font-weight: 850;
     margin: 0;
     color: var(--text-strong);
     cursor: text;
@@ -285,24 +291,24 @@
   }
 
   .kanban-column-header h2:hover {
-    background: rgba(255, 255, 255, 0.04);
-    outline: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(168, 85, 247, 0.1);
+    outline: 1px solid rgba(168, 85, 247, 0.18);
   }
 
   .kanban-column-header h2:focus {
     background: var(--bg-input);
     outline: 1px solid var(--primary);
-    box-shadow: none;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.18);
   }
 
   .kanban-column-header strong {
-    background: #3a3c43;
-    color: #c9cdfb;
-    border: 0;
+    background: rgba(139, 92, 246, 0.18);
+    color: #ddd6fe;
+    border: 1px solid rgba(139, 92, 246, 0.16);
     border-radius: 999px;
     padding: 3px 8px;
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 850;
     line-height: 1.25;
   }
 
@@ -316,8 +322,8 @@
   .ticket-card {
     padding: 12px;
     border-radius: var(--radius-md);
-    background: var(--bg-card);
-    border: 1px solid var(--border-soft);
+    background: rgba(39, 34, 52, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.065);
     box-shadow: none;
     backdrop-filter: none;
     transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
@@ -328,8 +334,8 @@
   .ticket-card:hover {
     transform: translateY(-1px);
     background: var(--bg-card-hover);
-    border-color: rgba(255, 255, 255, 0.11);
-    box-shadow: none;
+    border-color: rgba(251, 113, 133, 0.18);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   }
 
   .ticket-card.dragging {
@@ -339,7 +345,7 @@
 
   .ticket-title {
     font-size: 0.9rem;
-    font-weight: 800;
+    font-weight: 850;
     margin: 0 0 6px;
     color: var(--text-strong);
     line-height: 1.25;
@@ -357,8 +363,8 @@
   }
 
   .date-category-card {
-    background: #25262b;
-    border: 1px solid var(--border-soft);
+    background: rgba(23, 20, 33, 0.78);
+    border: 1px solid rgba(250, 204, 21, 0.13);
     border-radius: var(--radius-lg);
     padding: 10px;
   }
@@ -370,7 +376,7 @@
     gap: 10px;
     margin-bottom: 9px;
     padding-bottom: 9px;
-    border-bottom: 1px solid var(--border-soft);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   }
 
   .date-category-title-wrap {
@@ -390,15 +396,16 @@
 
   .date-category-title:hover,
   .date-category-title:focus {
-    background: rgba(255, 255, 255, 0.04);
-    outline: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(250, 204, 21, 0.09);
+    outline: 1px solid rgba(250, 204, 21, 0.18);
   }
 
   .date-category-date {
     display: block;
-    color: var(--text-muted);
+    color: #facc15;
     font-size: 0.74rem;
     margin-top: 2px;
+    opacity: 0.82;
   }
 
   .date-category-icon {
@@ -408,8 +415,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #c9cdfb;
-    background: rgba(88, 101, 242, 0.12);
+    color: #fde68a;
+    background: rgba(250, 204, 21, 0.12);
     border: 0;
     flex: 0 0 auto;
     font-size: 0.82rem;
@@ -426,17 +433,17 @@
 
   .date-category-dropzone:empty::before {
     content: "Arraste cards para cá";
-    color: rgba(148, 163, 184, 0.62);
+    color: rgba(169, 159, 189, 0.7);
     font-size: 0.76rem;
     padding: 8px 9px;
-    border: 1px dashed rgba(148, 163, 184, 0.18);
+    border: 1px dashed rgba(169, 159, 189, 0.2);
     border-radius: var(--radius-md);
     display: block;
   }
 
   .date-category-dropzone.drag-over {
-    background: rgba(88, 101, 242, 0.08);
-    outline: 1px dashed rgba(88, 101, 242, 0.38);
+    background: rgba(250, 204, 21, 0.08);
+    outline: 1px dashed rgba(250, 204, 21, 0.38);
   }
 
   .date-category-dropzone .ticket-card {
@@ -447,10 +454,10 @@
     position: fixed;
     z-index: 3000;
     min-width: 200px;
-    background: #111214;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #171421;
+    border: 1px solid rgba(168, 85, 247, 0.16);
     border-radius: var(--radius-md);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.42);
     padding: 6px;
     display: none;
   }
@@ -463,7 +470,7 @@
     padding: 6px 9px 8px;
     font-size: 0.68rem;
     color: var(--text-muted);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     margin-bottom: 5px;
   }
 
@@ -483,15 +490,16 @@
   }
 
   .context-menu-item:hover {
-    background: #2b2d31;
+    background: rgba(168, 85, 247, 0.12);
+    color: #fff;
   }
 
   .context-menu-item i {
-    color: #b5bac1;
+    color: #c4b5fd;
   }
 
   .context-menu-danger {
-    color: #ffb3b4;
+    color: #fecdd3;
   }
 
   .context-menu-danger:hover {
@@ -499,7 +507,7 @@
   }
 
   .context-menu-danger i {
-    color: #ffb3b4;
+    color: #fb7185;
   }
 
   .app-toast-container {
@@ -515,12 +523,12 @@
   }
 
   .app-toast {
-    background: #111214;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #171421;
+    border: 1px solid rgba(168, 85, 247, 0.16);
     color: var(--text-main);
     border-radius: var(--radius-md);
     padding: 10px 11px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.42);
     display: flex;
     align-items: flex-start;
     gap: 9px;
@@ -536,24 +544,24 @@
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    background: rgba(88, 101, 242, 0.14);
-    color: #c9cdfb;
+    background: rgba(139, 92, 246, 0.18);
+    color: #ddd6fe;
     border: 0;
     font-size: 0.8rem;
   }
 
   .app-toast.error .app-toast-icon {
-    background: rgba(242, 63, 66, 0.14);
-    color: #ffb3b4;
+    background: rgba(251, 113, 133, 0.16);
+    color: #fecdd3;
   }
 
   .app-toast.success .app-toast-icon {
-    background: rgba(35, 165, 89, 0.14);
-    color: #8ee8b6;
+    background: rgba(132, 204, 22, 0.16);
+    color: #d9f99d;
   }
 
   .app-toast-title {
-    font-weight: 800;
+    font-weight: 850;
     font-size: 0.82rem;
     margin-bottom: 1px;
     color: var(--text-strong);
@@ -586,14 +594,14 @@
   .modal-content {
     background: var(--bg-panel);
     color: var(--text-main);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(168, 85, 247, 0.15);
     border-radius: var(--radius-lg);
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
   }
 
   .modal-header,
   .modal-footer {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.07);
     padding: 12px 14px;
   }
 
@@ -629,13 +637,13 @@
   }
 
   .btn-info {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--fruit-blue));
     color: #fff;
   }
 
   .btn-info:hover,
   .btn-info:focus {
-    background: var(--primary-hover);
+    background: linear-gradient(135deg, var(--primary-hover), #0284c7);
     color: #fff;
   }
 
@@ -646,7 +654,7 @@
 
   .btn-danger:hover,
   .btn-danger:focus {
-    background: #d83c3e;
+    background: #e11d48;
     color: #fff;
   }
 
@@ -660,15 +668,15 @@
 
   .btn-outline-light:hover,
   .btn-outline-light:focus {
-    background: #3a3c43;
-    border-color: #3a3c43;
+    background: rgba(168, 85, 247, 0.13);
+    border-color: rgba(168, 85, 247, 0.22);
     color: #fff;
   }
 
   .form-label {
     color: var(--text-main);
     font-size: 0.78rem;
-    font-weight: 700;
+    font-weight: 750;
     margin-bottom: 6px;
   }
 
@@ -691,11 +699,11 @@
     background-color: var(--bg-input);
     color: var(--text-main);
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.22);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.22);
   }
 
   .form-control::placeholder {
-    color: #72767d;
+    color: #756a8d;
   }
 
   .form-select option {
@@ -719,7 +727,7 @@
 
   .meta-value {
     font-size: 0.82rem;
-    font-weight: 800;
+    font-weight: 850;
     color: var(--text-strong);
   }
 
@@ -759,8 +767,8 @@
 
   .editable-title:hover,
   .editable-description:hover {
-    background: rgba(255, 255, 255, 0.04);
-    outline: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(168, 85, 247, 0.1);
+    outline: 1px solid rgba(168, 85, 247, 0.18);
   }
 
   .edit-inline-input,
@@ -771,12 +779,12 @@
     color: var(--text-main);
     border-radius: var(--radius-sm);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.22);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.22);
   }
 
   .edit-inline-input {
     font-size: 1.25rem;
-    font-weight: 800;
+    font-weight: 850;
     padding: 8px 10px;
     margin-bottom: 10px;
   }
