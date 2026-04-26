@@ -265,47 +265,6 @@
       box-shadow: none;
     }
 
-    .column-title-wrap {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .column-date-label {
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      line-height: 1;
-      padding-left: 1px;
-    }
-
-    .kanban-column[data-column-type="data"] {
-      border-color: rgba(56, 189, 248, 0.22);
-    }
-
-    .kanban-column[data-column-type="data"] .kanban-column-header h2::before {
-      content: "\F214";
-      font-family: "bootstrap-icons";
-      font-size: 0.78rem;
-      color: #7dd3fc;
-      margin-right: 6px;
-      font-weight: 400;
-    }
-
-    .create-menu {
-      background: rgba(15, 23, 42, 0.98);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 14px;
-      padding: 8px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.42);
-    }
-
-    .create-menu .dropdown-item {
-      border-radius: 10px;
-      font-size: 0.88rem;
-      padding: 9px 11px;
-    }
-
     .kanban-column-header strong {
       background: #3a3c43;
       color: #c9cdfb;
@@ -365,6 +324,92 @@
 
     .ticket-mini-info {
       display: none;
+    }
+
+    .date-category-card {
+      background: rgba(2, 6, 23, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .date-category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.10);
+    }
+
+    .date-category-title-wrap {
+      min-width: 0;
+    }
+
+    .date-category-title {
+      font-size: 0.92rem;
+      font-weight: 900;
+      color: #f8fafc;
+      margin: 0;
+      cursor: text;
+      border-radius: 8px;
+      padding: 3px 5px;
+      margin-left: -5px;
+    }
+
+    .date-category-title:hover,
+    .date-category-title:focus {
+      background: rgba(56, 189, 248, 0.08);
+      outline: 1px dashed rgba(56, 189, 248, 0.24);
+    }
+
+    .date-category-date {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      margin-top: 2px;
+    }
+
+    .date-category-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #7dd3fc;
+      background: rgba(56, 189, 248, 0.10);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      flex: 0 0 auto;
+    }
+
+    .date-category-dropzone {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 44px;
+      border-radius: 12px;
+      transition: background 0.16s ease, outline 0.16s ease;
+    }
+
+    .date-category-dropzone:empty::before {
+      content: "Arraste cards para cá";
+      color: rgba(148, 163, 184, 0.58);
+      font-size: 0.78rem;
+      padding: 9px 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.18);
+      border-radius: 12px;
+      display: block;
+    }
+
+    .date-category-dropzone.drag-over {
+      background: rgba(56, 189, 248, 0.06);
+      outline: 1px dashed rgba(56, 189, 248, 0.32);
+    }
+
+    .date-category-dropzone .ticket-card {
+      box-shadow: none;
     }
 
     .app-version {
@@ -777,30 +822,14 @@
           </ul>
         </div>
 
-        <div class="dropdown">
-          <button
-            class="btn btn-icon-create dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            title="Criar"
-          >
-            <i class="bi bi-plus-lg"></i>
-          </button>
-
-          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end create-menu">
-            <li>
-              <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#modalNovaColuna">
-                <i class="bi bi-columns-gap me-2"></i>Criar coluna
-              </button>
-            </li>
-            <li>
-              <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#modalGrupoData">
-                <i class="bi bi-calendar-event me-2"></i>Criar grupo por data
-              </button>
-            </li>
-          </ul>
-        </div>
+        <button
+          class="btn btn-icon-create"
+          data-bs-toggle="modal"
+          data-bs-target="#modalNovaColuna"
+          title="Criar coluna"
+        >
+          <i class="bi bi-plus-lg"></i>
+        </button>
       </div>
     </section>
 
@@ -819,6 +848,11 @@
     <button type="button" class="context-menu-item" id="addCardFromContext">
       <i class="bi bi-plus-square"></i>
       Adicionar novo card
+    </button>
+
+    <button type="button" class="context-menu-item" id="addDateCategoryFromContext">
+      <i class="bi bi-calendar-plus"></i>
+      Criar categoria de data
     </button>
 
     <button type="button" class="context-menu-item context-menu-danger" id="removeColumnFromContext">
@@ -857,38 +891,6 @@
     </div>
   </div>
 
-  <div class="modal fade" id="modalGrupoData" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Criar grupo por data</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-
-        <div class="modal-body">
-          <form id="newDateGroupForm" class="row g-3">
-            <div class="col-12">
-              <label class="form-label">Título do grupo</label>
-              <input type="text" class="form-control" id="newDateGroupTitle" placeholder="Ex: Hoje" />
-            </div>
-
-            <div class="col-12">
-              <label class="form-label">Data</label>
-              <input type="date" class="form-control" id="newDateGroupDate" />
-            </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-info fw-bold" id="saveNewDateGroupBtn">
-            <i class="bi bi-save me-1"></i> Salvar grupo
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="modal fade" id="modalNovaColuna" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered">
       <div class="modal-content">
@@ -908,6 +910,38 @@
           <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-info fw-bold" id="saveNewColumnBtn">
             <i class="bi bi-save me-1"></i> Salvar coluna
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalCategoriaData" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Criar categoria de data</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+
+        <div class="modal-body">
+          <form id="dateCategoryForm" class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Título da categoria</label>
+              <input type="text" class="form-control" id="dateCategoryTitle" placeholder="Ex: Hoje" />
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Data</label>
+              <input type="date" class="form-control" id="dateCategoryDate" />
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-info fw-bold" id="saveDateCategoryBtn">
+            <i class="bi bi-save me-1"></i> Salvar categoria
           </button>
         </div>
       </div>
@@ -1024,13 +1058,14 @@
     const cardContextMenu = document.getElementById("cardContextMenu");
     const columnContextMenuTitle = document.getElementById("columnContextMenuTitle");
     const addCardFromContext = document.getElementById("addCardFromContext");
+    const addDateCategoryFromContext = document.getElementById("addDateCategoryFromContext");
     const removeColumnFromContext = document.getElementById("removeColumnFromContext");
     const removeCardFromContext = document.getElementById("removeCardFromContext");
     const kanbanBoard = document.getElementById("kanbanBoard");
 
     const modalNovoCard = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovoCard"));
     const modalNovaColuna = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovaColuna"));
-    const modalGrupoData = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalGrupoData"));
+    const modalCategoriaData = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCategoriaData"));
     const modalDetalhesCard = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalhesCard"));
     const modalConfirmacaoEl = document.getElementById("modalConfirmacao");
     const modalConfirmacao = bootstrap.Modal.getOrCreateInstance(modalConfirmacaoEl);
@@ -1041,10 +1076,11 @@
     const newColumnForm = document.getElementById("newColumnForm");
     const newColumnTitle = document.getElementById("newColumnTitle");
     const saveNewColumnBtn = document.getElementById("saveNewColumnBtn");
-    const newDateGroupForm = document.getElementById("newDateGroupForm");
-    const newDateGroupTitle = document.getElementById("newDateGroupTitle");
-    const newDateGroupDate = document.getElementById("newDateGroupDate");
-    const saveNewDateGroupBtn = document.getElementById("saveNewDateGroupBtn");
+
+    const dateCategoryForm = document.getElementById("dateCategoryForm");
+    const dateCategoryTitle = document.getElementById("dateCategoryTitle");
+    const dateCategoryDate = document.getElementById("dateCategoryDate");
+    const saveDateCategoryBtn = document.getElementById("saveDateCategoryBtn");
 
     const newCardForm = document.getElementById("newCardForm");
     const newCardTitle = document.getElementById("newCardTitle");
@@ -1230,6 +1266,21 @@
       return user?.nome_exibicao || user?.usuario || "Sem responsável";
     }
 
+    function formatDateBR(dateValue) {
+      if (!dateValue) return "Sem data";
+      const [year, month, day] = String(dateValue).split("-");
+      if (!year || !month || !day) return dateValue;
+      return `${day}/${month}/${year}`;
+    }
+
+    function getTodayISO() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
     function renderResponsibleOptions() {
       newCardResponsible.innerHTML = `<option value="">Sem responsável</option>`;
 
@@ -1368,31 +1419,15 @@
       detailDescriptionDisplay.classList.remove("d-none");
     }
 
-    function formatDateBR(dateString) {
-      if (!dateString) return "";
-      const parts = String(dateString).split("-");
-      if (parts.length !== 3) return "";
-      return parts[2] + "/" + parts[1] + "/" + parts[0];
-    }
-
     function createColumnElement(coluna) {
       const column = document.createElement("div");
       column.className = "kanban-column";
       column.dataset.columnId = coluna.id;
       column.dataset.columnTitle = coluna.titulo;
-      column.dataset.columnType = coluna.tipo || "status";
-      column.dataset.columnDate = coluna.data_referencia || "";
-
-      const dateLabel = coluna.tipo === "data" && coluna.data_referencia
-        ? '<small class="column-date-label">' + formatDateBR(coluna.data_referencia) + '</small>'
-        : "";
 
       column.innerHTML = `
         <div class="kanban-column-header">
-          <div class="column-title-wrap">
-            <h2>${coluna.titulo}</h2>
-            ${dateLabel}
-          </div>
+          <h2>${coluna.titulo}</h2>
           <strong>0</strong>
         </div>
         <div class="column-cards"></div>
@@ -1402,7 +1437,36 @@
       return column;
     }
 
+    function createDateCategoryElement(card) {
+      const article = document.createElement("article");
+      article.className = "date-category-card";
+      article.dataset.cardId = card.id;
+      article.dataset.categoryId = card.id;
+      article.dataset.colunaId = card.coluna_id;
+
+      article.innerHTML = `
+        <div class="date-category-header">
+          <div class="date-category-title-wrap">
+            <h3 class="date-category-title" title="Clique para editar o título"></h3>
+            <span class="date-category-date"></span>
+          </div>
+          <span class="date-category-icon"><i class="bi bi-calendar-event"></i></span>
+        </div>
+        <div class="date-category-dropzone"></div>
+      `;
+
+      article.querySelector(".date-category-title").textContent = card.titulo;
+      article.querySelector(".date-category-date").textContent = formatDateBR(card.data_referencia);
+
+      attachDateCategoryEvents(article);
+      return article;
+    }
+
     function createCardElement(card) {
+      if (card.tipo === "categoria_data") {
+        return createDateCategoryElement(card);
+      }
+
       const responsavelNome =
         card.responsavel?.nome_exibicao ||
         card.responsavel?.usuario ||
@@ -1412,6 +1476,7 @@
       article.className = "ticket-card ticket-open-modal";
       article.setAttribute("draggable", "true");
       article.dataset.cardId = card.id;
+      article.dataset.categoriaId = card.categoria_id || "";
       article.setAttribute("role", "button");
       article.setAttribute("tabindex", "0");
 
@@ -1463,6 +1528,108 @@
         document.querySelectorAll(".kanban-column").forEach((column) => {
           column.classList.remove("drag-over");
         });
+      });
+    }
+
+    function attachDateCategoryEvents(categoryElement) {
+      const titleElement = categoryElement.querySelector(".date-category-title");
+      const dropzone = categoryElement.querySelector(".date-category-dropzone");
+
+      titleElement.addEventListener("click", function (e) {
+        e.stopPropagation();
+        titleElement.setAttribute("contenteditable", "true");
+        titleElement.dataset.originalTitle = titleElement.textContent.trim();
+        titleElement.focus();
+
+        const range = document.createRange();
+        range.selectNodeContents(titleElement);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      });
+
+      titleElement.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          titleElement.blur();
+        }
+
+        if (e.key === "Escape") {
+          e.preventDefault();
+          titleElement.textContent = titleElement.dataset.originalTitle || titleElement.textContent.trim();
+          titleElement.blur();
+        }
+      });
+
+      titleElement.addEventListener("blur", async function () {
+        const oldTitle = titleElement.dataset.originalTitle || "Categoria";
+        const newTitle = titleElement.textContent.trim();
+        titleElement.removeAttribute("contenteditable");
+
+        if (!newTitle) {
+          titleElement.textContent = oldTitle;
+          showToast("Campo obrigatório", "O título da categoria não pode ficar vazio.", "error");
+          return;
+        }
+
+        if (oldTitle === newTitle) return;
+
+        try {
+          await apiFetch("/api/cards", {
+            method: "PATCH",
+            body: JSON.stringify({
+              id: categoryElement.dataset.categoryId,
+              titulo: newTitle
+            })
+          });
+
+          showToast("Categoria atualizada", `A categoria agora se chama "${newTitle}".`, "success");
+          await loadBoardFromApi(false);
+        } catch (error) {
+          titleElement.textContent = oldTitle;
+          showToast("Erro", error.message, "error");
+        }
+      });
+
+      categoryElement.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        activeCard = categoryElement;
+        activeColumn = null;
+        positionMenu(cardContextMenu, e.clientX, e.clientY);
+      });
+
+      dropzone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add("drag-over");
+      });
+
+      dropzone.addEventListener("dragleave", function () {
+        dropzone.classList.remove("drag-over");
+      });
+
+      dropzone.addEventListener("drop", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove("drag-over");
+
+        if (!draggedCard) return;
+
+        try {
+          await apiFetch("/api/cards", {
+            method: "PATCH",
+            body: JSON.stringify({
+              id: draggedCard.dataset.cardId,
+              coluna_id: categoryElement.dataset.colunaId,
+              categoria_id: categoryElement.dataset.categoryId
+            })
+          });
+
+          await loadBoardFromApi(false);
+        } catch (error) {
+          showToast("Erro", error.message, "error");
+        }
       });
     }
 
@@ -1555,7 +1722,8 @@
             method: "PATCH",
             body: JSON.stringify({
               id: cardId,
-              coluna_id: colunaId
+              coluna_id: colunaId,
+              categoria_id: null
             })
           });
 
@@ -1614,9 +1782,25 @@
       colunas.forEach((coluna) => {
         const columnElement = createColumnElement(coluna);
         const cardsContainer = columnElement.querySelector(".column-cards");
+        const cardsDaColuna = cards.filter((card) => card.coluna_id === coluna.id);
+        const categoriasDaColuna = cardsDaColuna.filter((card) => card.tipo === "categoria_data");
+        const cardsNormais = cardsDaColuna.filter((card) => card.tipo !== "categoria_data");
 
-        cards
-          .filter((card) => card.coluna_id === coluna.id)
+        categoriasDaColuna.forEach((categoria) => {
+          const categoriaElement = createCardElement(categoria);
+          const dropzone = categoriaElement.querySelector(".date-category-dropzone");
+
+          cardsNormais
+            .filter((card) => card.categoria_id === categoria.id)
+            .forEach((card) => {
+              dropzone.appendChild(createCardElement(card));
+            });
+
+          cardsContainer.appendChild(categoriaElement);
+        });
+
+        cardsNormais
+          .filter((card) => !card.categoria_id)
           .forEach((card) => {
             cardsContainer.appendChild(createCardElement(card));
           });
@@ -1707,6 +1891,65 @@ async function startRealtime() {
       modalNovoCard.show();
     });
 
+    addDateCategoryFromContext.addEventListener("click", function () {
+      targetColumnForNewCard = activeColumn;
+      hideContextMenu();
+
+      dateCategoryForm.reset();
+      dateCategoryTitle.value = "Hoje";
+      dateCategoryDate.value = getTodayISO();
+      modalCategoriaData.show();
+    });
+
+    saveDateCategoryBtn.addEventListener("click", async function () {
+      const titulo = dateCategoryTitle.value.trim();
+      const data_referencia = dateCategoryDate.value;
+
+      if (!targetColumnForNewCard) {
+        showToast("Erro", "Nenhuma coluna selecionada para criar a categoria.", "error");
+        return;
+      }
+
+      if (!titulo) {
+        showToast("Campo obrigatório", "Preencha o título da categoria.", "error");
+        dateCategoryTitle.focus();
+        return;
+      }
+
+      if (!data_referencia) {
+        showToast("Campo obrigatório", "Preencha a data da categoria.", "error");
+        dateCategoryDate.focus();
+        return;
+      }
+
+      try {
+        await apiFetch("/api/cards", {
+          method: "POST",
+          body: JSON.stringify({
+            coluna_id: targetColumnForNewCard.dataset.columnId,
+            titulo,
+            descricao: "",
+            quem_pediu: "Categoria de data",
+            responsavel_id: null,
+            tipo: "categoria_data",
+            data_referencia
+          })
+        });
+
+        dateCategoryForm.reset();
+        modalCategoriaData.hide();
+        showToast("Categoria criada", `A categoria "${titulo}" foi adicionada.`, "success");
+        await loadBoardFromApi(false);
+      } catch (error) {
+        showToast("Erro", error.message, "error");
+      }
+    });
+
+    dateCategoryForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      saveDateCategoryBtn.click();
+    });
+
     removeColumnFromContext.addEventListener("click", async function () {
       if (!activeColumn) return;
 
@@ -1743,7 +1986,7 @@ async function startRealtime() {
       if (!activeCard) return;
 
       const id = activeCard.dataset.cardId;
-      const title = activeCard.querySelector(".ticket-title")?.textContent?.trim() || "este card";
+      const title = activeCard.querySelector(".ticket-title")?.textContent?.trim() || activeCard.querySelector(".date-category-title")?.textContent?.trim() || "este card";
 
       const confirmed = await showConfirm({
         title: "Excluir card",
@@ -1783,7 +2026,7 @@ async function startRealtime() {
       try {
         await apiFetch("/api/colunas", {
           method: "POST",
-          body: JSON.stringify({ titulo, tipo: "status", data_referencia: null })
+          body: JSON.stringify({ titulo })
         });
 
         newColumnForm.reset();
@@ -1793,49 +2036,6 @@ async function startRealtime() {
       } catch (error) {
         showToast("Erro", error.message, "error");
       }
-    });
-
-    saveNewDateGroupBtn.addEventListener("click", async function () {
-      const titulo = newDateGroupTitle.value.trim();
-      const data_referencia = newDateGroupDate.value;
-
-      if (!titulo) {
-        showToast("Campo obrigatório", "Preencha o título do grupo por data.", "error");
-        newDateGroupTitle.focus();
-        return;
-      }
-
-      if (!data_referencia) {
-        showToast("Campo obrigatório", "Selecione a data do grupo.", "error");
-        newDateGroupDate.focus();
-        return;
-      }
-
-      try {
-        await apiFetch("/api/colunas", {
-          method: "POST",
-          body: JSON.stringify({ titulo, tipo: "data", data_referencia })
-        });
-
-        newDateGroupForm.reset();
-        modalGrupoData.hide();
-        showToast("Grupo criado", 'O grupo "' + titulo + '" foi adicionado.', "success");
-        await loadBoardFromApi(false);
-      } catch (error) {
-        showToast("Erro", error.message, "error");
-      }
-    });
-
-    newDateGroupForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      saveNewDateGroupBtn.click();
-    });
-
-    document.getElementById("modalGrupoData").addEventListener("shown.bs.modal", function () {
-      if (!newDateGroupDate.value) {
-        newDateGroupDate.value = new Date().toISOString().slice(0, 10);
-      }
-      newDateGroupTitle.focus();
     });
 
     newColumnForm.addEventListener("submit", function (e) {
@@ -1880,7 +2080,9 @@ async function startRealtime() {
             titulo,
             descricao,
             quem_pediu,
-            responsavel_id
+            responsavel_id,
+            categoria_id: null,
+            tipo: "chamado"
           })
         });
 
