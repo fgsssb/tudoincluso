@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chamados TI</title>
+  <title>1.0.26.04.2026</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
@@ -73,10 +73,18 @@
       border-radius: 14px;
       padding: 0;
       font-size: 1rem;
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      border: 0;
+      color: #020617;
+      font-weight: 800;
+      box-shadow: 0 12px 28px rgba(56, 189, 248, 0.22);
     }
 
-    .mini-profile {
-      position: relative;
+    .btn-icon-create:hover,
+    .btn-icon-create:focus {
+      background: linear-gradient(135deg, #38bdf8, #7dd3fc);
+      color: #020617;
+      transform: translateY(-1px);
     }
 
     .mini-profile-btn {
@@ -99,11 +107,6 @@
       background: rgba(30, 41, 59, 0.95);
       border-color: rgba(203, 213, 225, 0.36);
       color: #f8fafc;
-    }
-
-    .mini-profile-btn::after {
-      margin-left: 2px;
-      opacity: 0.75;
     }
 
     .mini-profile-avatar {
@@ -135,66 +138,6 @@
       border-radius: 10px;
       font-size: 0.88rem;
       padding: 9px 11px;
-    }
-
-    .btn-icon-create {
-      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-      border: 0;
-      color: #020617;
-      font-weight: 800;
-      box-shadow: 0 12px 28px rgba(56, 189, 248, 0.22);
-    }
-
-    .btn-icon-create:hover,
-    .btn-icon-create:focus {
-      background: linear-gradient(135deg, #38bdf8, #7dd3fc);
-      color: #020617;
-      transform: translateY(-1px);
-    }
-
-    .filter-card,
-    .ticket-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-    }
-
-    .filter-card {
-      padding: 18px;
-      margin: 0 0 16px;
-      flex: 0 0 auto;
-    }
-
-    .form-label {
-      color: #e2e8f0;
-      font-size: 0.9rem;
-    }
-
-    .form-control,
-    .form-select {
-      background-color: #020617;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      border-radius: 12px;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-      background-color: #020617;
-      color: var(--text-main);
-      border-color: var(--primary);
-      box-shadow: 0 0 0 0.2rem rgba(56, 189, 248, 0.14);
-    }
-
-    .form-control::placeholder {
-      color: #64748b;
-    }
-
-    .form-select option {
-      background: #020617;
-      color: var(--text-main);
     }
 
     .board-shell {
@@ -254,10 +197,6 @@
       transition: border-color 0.2s ease, background 0.2s ease;
     }
 
-    .kanban-column:hover {
-      border-color: rgba(148, 163, 184, 0.26);
-    }
-
     .kanban-column.drag-over {
       border-color: rgba(56, 189, 248, 0.5);
       background: rgba(15, 23, 42, 0.92);
@@ -283,7 +222,6 @@
       padding: 4px 6px;
       margin-left: -6px;
       min-width: 40px;
-      transition: background 0.18s ease, outline 0.18s ease;
     }
 
     .kanban-column-header h2:hover {
@@ -316,6 +254,10 @@
     .ticket-card {
       padding: 16px;
       border-radius: 18px;
+      background: var(--bg-card);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(12px);
       transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
       cursor: pointer;
       user-select: none;
@@ -343,16 +285,11 @@
       color: var(--text-muted);
       font-size: 0.86rem;
       line-height: 1.45;
-      margin-bottom: 14px;
+      margin-bottom: 0;
     }
 
     .ticket-mini-info {
       display: none;
-    }
-
-    .ticket-mini-info i {
-      color: #94a3b8;
-      margin-right: 6px;
     }
 
     .app-version {
@@ -528,6 +465,36 @@
       filter: invert(1) grayscale(100%);
     }
 
+    .form-label {
+      color: #e2e8f0;
+      font-size: 0.9rem;
+    }
+
+    .form-control,
+    .form-select {
+      background-color: #020617;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 12px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      background-color: #020617;
+      color: var(--text-main);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.2rem rgba(56, 189, 248, 0.14);
+    }
+
+    .form-control::placeholder {
+      color: #64748b;
+    }
+
+    .form-select option {
+      background: #020617;
+      color: var(--text-main);
+    }
+
     .meta-box {
       background: rgba(15, 23, 42, 0.74);
       border: 1px solid rgba(148, 163, 184, 0.12);
@@ -620,10 +587,6 @@
         padding: 18px 12px 48px;
       }
 
-      .top-header {
-        justify-content: flex-end;
-      }
-
       .top-actions {
         width: 100%;
         justify-content: flex-end;
@@ -660,7 +623,7 @@
 
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end mini-profile-menu">
             <li>
-              <button class="dropdown-item text-danger" type="button">
+              <button class="dropdown-item text-danger" type="button" id="logoutButton">
                 <i class="bi bi-box-arrow-right me-2"></i>Sair da conta
               </button>
             </li>
@@ -680,88 +643,7 @@
 
     <div class="board-shell">
       <div class="kanban-scroll-area">
-        <section class="kanban-board" id="kanbanBoard">
-          <div class="kanban-column" data-column-title="A fazer" data-default-status="A fazer">
-            <div class="kanban-column-header">
-              <h2>A fazer</h2>
-              <strong>0</strong>
-            </div>
-
-            <div class="column-cards">
-              <article class="ticket-card ticket-open-modal" draggable="true" data-card-id="card-1" role="button" tabindex="0">
-                <h3 class="ticket-title">Computador não liga</h3>
-                <p class="ticket-description">PC do financeiro não dá vídeo e não inicia o Windows.</p>
-                <div class="ticket-mini-info">
-                  <span><i class="bi bi-person"></i> Quem pediu: Lívia</span>
-                  <span><i class="bi bi-person-check"></i> Responsável: Sem responsável</span>
-                </div>
-              </article>
-
-              <article class="ticket-card ticket-open-modal" draggable="true" data-card-id="card-2" role="button" tabindex="0">
-                <h3 class="ticket-title">Instalar programa</h3>
-                <p class="ticket-description">Solicitado instalação de programa em computador novo.</p>
-                <div class="ticket-mini-info">
-                  <span><i class="bi bi-person"></i> Quem pediu: Camila</span>
-                  <span><i class="bi bi-person-check"></i> Responsável: Sem responsável</span>
-                </div>
-              </article>
-            </div>
-          </div>
-
-          <div class="kanban-column" data-column-title="Em atendimento" data-default-status="Em atendimento">
-            <div class="kanban-column-header">
-              <h2>Em atendimento</h2>
-              <strong>0</strong>
-            </div>
-
-            <div class="column-cards">
-              <article class="ticket-card ticket-open-modal" draggable="true" data-card-id="card-3" role="button" tabindex="0">
-                <h3 class="ticket-title">Outlook pedindo senha</h3>
-                <p class="ticket-description">Outlook não conclui autenticação e trava no login.</p>
-                <div class="ticket-mini-info">
-                  <span><i class="bi bi-person"></i> Quem pediu: Marcos</span>
-                  <span><i class="bi bi-person-check"></i> Responsável: Jean</span>
-                </div>
-              </article>
-            </div>
-          </div>
-
-          <div class="kanban-column" data-column-title="Aguardando" data-default-status="Aguardando">
-            <div class="kanban-column-header">
-              <h2>Aguardando</h2>
-              <strong>0</strong>
-            </div>
-
-            <div class="column-cards">
-              <article class="ticket-card ticket-open-modal" draggable="true" data-card-id="card-4" role="button" tabindex="0">
-                <h3 class="ticket-title">Impressora não imprime</h3>
-                <p class="ticket-description">Fila trava e documentos ficam pendentes na impressora.</p>
-                <div class="ticket-mini-info">
-                  <span><i class="bi bi-person"></i> Quem pediu: Ana</span>
-                  <span><i class="bi bi-person-check"></i> Responsável: Jean</span>
-                </div>
-              </article>
-            </div>
-          </div>
-
-          <div class="kanban-column" data-column-title="Concluído" data-default-status="Concluído">
-            <div class="kanban-column-header">
-              <h2>Concluído</h2>
-              <strong>0</strong>
-            </div>
-
-            <div class="column-cards">
-              <article class="ticket-card ticket-open-modal" draggable="true" data-card-id="card-5" role="button" tabindex="0">
-                <h3 class="ticket-title">Som do telefone no ramal</h3>
-                <p class="ticket-description">Áudio ajustado para sair corretamente no aparelho conectado.</p>
-                <div class="ticket-mini-info">
-                  <span><i class="bi bi-person"></i> Quem pediu: Rafael</span>
-                  <span><i class="bi bi-person-check"></i> Responsável: Jean</span>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
+        <section class="kanban-board" id="kanbanBoard"></section>
       </div>
     </div>
 
@@ -791,6 +673,7 @@
     </button>
   </div>
 
+
   <div class="modal fade" id="modalConfirmacao" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered">
       <div class="modal-content">
@@ -804,10 +687,8 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-light" id="confirmCancelBtn" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-danger fw-bold" id="confirmOkBtn">
-            Confirmar
-          </button>
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger fw-bold" id="confirmOkBtn">Confirmar</button>
         </div>
       </div>
     </div>
@@ -866,9 +747,7 @@
             <div class="col-12 col-md-6">
               <label class="form-label">Responsável</label>
               <select class="form-select" id="newCardResponsible">
-                <option selected>Sem responsável</option>
-                <option>Jean</option>
-                <option>Suporte externo</option>
+                <option value="">Sem responsável</option>
               </select>
             </div>
           </form>
@@ -941,6 +820,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
@@ -956,7 +836,8 @@
     const modalNovoCard = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovoCard"));
     const modalNovaColuna = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovaColuna"));
     const modalDetalhesCard = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalhesCard"));
-    const modalConfirmacao = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalConfirmacao"));
+    const modalConfirmacaoEl = document.getElementById("modalConfirmacao");
+    const modalConfirmacao = bootstrap.Modal.getOrCreateInstance(modalConfirmacaoEl);
     const confirmTitle = document.getElementById("confirmTitle");
     const confirmMessage = document.getElementById("confirmMessage");
     const confirmOkBtn = document.getElementById("confirmOkBtn");
@@ -981,26 +862,17 @@
     const detailCurrentColumn = document.getElementById("detailCurrentColumn");
     const cardLogList = document.getElementById("cardLogList");
 
+    let loggedUser = null;
+    let users = [];
+    let colunas = [];
+    let cards = [];
+    let logs = [];
     let activeColumn = null;
     let activeCard = null;
     let currentCard = null;
     let targetColumnForNewCard = null;
     let draggedCard = null;
-    let cardCounter = 6;
-
-    const cardLogs = {
-      "card-1": [{ date: "26/04/2026 08:42", text: "Card criado por Jean" }],
-      "card-2": [{ date: "26/04/2026 10:10", text: "Card criado por Jean" }],
-      "card-3": [
-        { date: "26/04/2026 08:42", text: "Card criado por Jean" },
-        { date: "26/04/2026 09:10", text: "Movido para Em atendimento" }
-      ],
-      "card-4": [{ date: "26/04/2026 11:12", text: "Card criado por Jean" }],
-      "card-5": [
-        { date: "26/04/2026 12:05", text: "Card criado por Jean" },
-        { date: "26/04/2026 12:30", text: "Movido para Concluído" }
-      ]
-    };
+    let realtimeClient = null;
 
     function showConfirm({ title = "Confirmar ação", message = "Tem certeza que deseja continuar?", confirmText = "Confirmar", danger = true } = {}) {
       return new Promise((resolve) => {
@@ -1009,25 +881,27 @@
         confirmOkBtn.textContent = confirmText;
         confirmOkBtn.className = danger ? "btn btn-danger fw-bold" : "btn btn-info fw-bold";
 
-        const handleConfirm = () => {
-          cleanup();
-          modalConfirmacao.hide();
-          resolve(true);
-        };
-
-        const handleHidden = () => {
-          cleanup();
-          resolve(false);
-        };
+        let resolved = false;
 
         function cleanup() {
           confirmOkBtn.removeEventListener("click", handleConfirm);
-          document.getElementById("modalConfirmacao").removeEventListener("hidden.bs.modal", handleHidden);
+          modalConfirmacaoEl.removeEventListener("hidden.bs.modal", handleHidden);
         }
 
-        confirmOkBtn.addEventListener("click", handleConfirm, { once: true });
-        document.getElementById("modalConfirmacao").addEventListener("hidden.bs.modal", handleHidden, { once: true });
+        function handleConfirm() {
+          resolved = true;
+          cleanup();
+          modalConfirmacao.hide();
+          resolve(true);
+        }
 
+        function handleHidden() {
+          cleanup();
+          if (!resolved) resolve(false);
+        }
+
+        confirmOkBtn.addEventListener("click", handleConfirm);
+        modalConfirmacaoEl.addEventListener("hidden.bs.modal", handleHidden, { once: true });
         modalConfirmacao.show();
       });
     }
@@ -1051,15 +925,50 @@
       setTimeout(() => toast.remove(), 2850);
     }
 
-    function getCurrentDateTime() {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, "0");
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const year = now.getFullYear();
-      const hour = String(now.getHours()).padStart(2, "0");
-      const minute = String(now.getMinutes()).padStart(2, "0");
-      return `${day}/${month}/${year} ${hour}:${minute}`;
+    async function apiFetch(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+
+      if (response.status === 401) {
+        window.location.href = "/index.html";
+        return null;
+      }
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data.ok === false) {
+        throw new Error(data.message || "Erro na requisição.");
+      }
+
+      return data;
     }
+
+    async function requireLogin() {
+      const response = await fetch("/api/me");
+
+      if (!response.ok) {
+        window.location.href = "/index.html";
+        return;
+      }
+
+      const data = await response.json();
+      loggedUser = data.user;
+
+      const profileName = document.querySelector(".mini-profile-name");
+      if (profileName) {
+        profileName.textContent = loggedUser.nome_exibicao || loggedUser.usuario;
+      }
+    }
+
+    document.getElementById("logoutButton").addEventListener("click", async function () {
+      await fetch("/api/logout", { method: "POST" });
+      window.location.href = "/index.html";
+    });
 
     function hideContextMenu() {
       columnContextMenu.classList.remove("show");
@@ -1099,12 +1008,6 @@
       positionMenu(cardContextMenu, x, y);
     }
 
-    function getColumnByTitle(title) {
-      return [...document.querySelectorAll(".kanban-column")].find(
-        (column) => column.dataset.columnTitle === title
-      );
-    }
-
     function updateColumnCounts() {
       document.querySelectorAll(".kanban-column").forEach((column) => {
         const count = column.querySelectorAll(".ticket-card").length;
@@ -1113,47 +1016,89 @@
       });
     }
 
-    function addLogItem(cardId, message) {
-      if (!cardLogs[cardId]) cardLogs[cardId] = [];
-      cardLogs[cardId].unshift({ date: getCurrentDateTime(), text: message });
-      if (currentCard && currentCard.dataset.cardId === cardId) renderCardLogs(cardId);
+    function getCardById(id) {
+      return cards.find((card) => card.id === id);
     }
 
-    function renderCardLogs(cardId) {
-      const logs = cardLogs[cardId] || [];
+    function getColumnById(id) {
+      return colunas.find((coluna) => coluna.id === id);
+    }
+
+    function getUserNameById(id) {
+      if (!id) return "Sem responsável";
+      const user = users.find((item) => item.id === id);
+      return user?.nome_exibicao || user?.usuario || "Sem responsável";
+    }
+
+    function renderResponsibleOptions() {
+      newCardResponsible.innerHTML = `<option value="">Sem responsável</option>`;
+
+      users.forEach((user) => {
+        const option = document.createElement("option");
+        option.value = user.id;
+        option.textContent = user.nome_exibicao || user.usuario;
+        newCardResponsible.appendChild(option);
+      });
+    }
+
+    function renderLogs(cardId) {
+      const cardLogs = logs.filter((log) => log.card_id === cardId);
+
       cardLogList.innerHTML = "";
-      logs.forEach((log) => {
+
+      if (!cardLogs.length) {
+        const empty = document.createElement("div");
+        empty.className = "log-item";
+        empty.innerHTML = `
+          <div class="log-date">Sem registros</div>
+          <div class="log-text">Nenhum acontecimento registrado ainda.</div>
+        `;
+        cardLogList.appendChild(empty);
+        return;
+      }
+
+      cardLogs.forEach((log) => {
         const item = document.createElement("div");
         item.className = "log-item";
+
+        const date = new Date(log.criado_em);
+        const formattedDate = date.toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+
         item.innerHTML = `
-          <div class="log-date">${log.date}</div>
-          <div class="log-text">${log.text}</div>
+          <div class="log-date">${formattedDate}</div>
+          <div class="log-text">${log.acao}</div>
         `;
+
         cardLogList.appendChild(item);
       });
     }
 
-    function getCardData(card) {
-      const title = card.querySelector(".ticket-title")?.textContent?.trim() || "";
-      const description = card.querySelector(".ticket-description")?.textContent?.trim() || "";
-      const infoItems = card.querySelectorAll(".ticket-mini-info span");
-      const requestedBy = infoItems[0]?.textContent.replace("Quem pediu:", "").trim() || "";
-      const responsible = infoItems[1]?.textContent.replace("Responsável:", "").trim() || "";
-      const columnTitle = card.closest(".kanban-column")?.dataset.columnTitle || "";
-      return { title, description, requestedBy, responsible, columnTitle };
-    }
+    function fillDetailsModal(cardElement) {
+      const card = getCardById(cardElement.dataset.cardId);
+      if (!card) return;
 
-    function fillDetailsModal(card) {
-      currentCard = card;
-      const data = getCardData(card);
-      detailTitleDisplay.textContent = data.title;
-      detailTitleInput.value = data.title;
-      detailDescriptionDisplay.textContent = data.description;
-      detailDescriptionInput.value = data.description;
-      detailRequestedBy.textContent = data.requestedBy;
-      detailResponsible.textContent = data.responsible;
-      detailCurrentColumn.textContent = data.columnTitle;
-      renderCardLogs(card.dataset.cardId);
+      currentCard = cardElement;
+
+      const responsavelNome =
+        card.responsavel?.nome_exibicao ||
+        card.responsavel?.usuario ||
+        getUserNameById(card.responsavel_id);
+
+      detailTitleDisplay.textContent = card.titulo;
+      detailTitleInput.value = card.titulo;
+      detailDescriptionDisplay.textContent = card.descricao;
+      detailDescriptionInput.value = card.descricao;
+      detailRequestedBy.textContent = card.quem_pediu;
+      detailResponsible.textContent = responsavelNome;
+      detailCurrentColumn.textContent = card.coluna?.titulo || getColumnById(card.coluna_id)?.titulo || "";
+      renderLogs(card.id);
+
       closeTitleEditor(false);
       closeDescriptionEditor(false);
     }
@@ -1167,12 +1112,26 @@
       detailTitleInput.select();
     }
 
-    function closeTitleEditor(save = true) {
+    async function closeTitleEditor(save = true) {
       if (save && currentCard) {
+        const cardId = currentCard.dataset.cardId;
         const newTitle = detailTitleInput.value.trim() || "Sem título";
-        detailTitleDisplay.textContent = newTitle;
-        currentCard.querySelector(".ticket-title").textContent = newTitle;
+
+        try {
+          await apiFetch("/api/cards", {
+            method: "PATCH",
+            body: JSON.stringify({
+              id: cardId,
+              titulo: newTitle
+            })
+          });
+
+          await loadBoardFromApi(false);
+        } catch (error) {
+          showToast("Erro", error.message, "error");
+        }
       }
+
       detailTitleInput.classList.add("d-none");
       detailTitleDisplay.classList.remove("d-none");
     }
@@ -1185,14 +1144,75 @@
       detailDescriptionInput.focus();
     }
 
-    function closeDescriptionEditor(save = true) {
+    async function closeDescriptionEditor(save = true) {
       if (save && currentCard) {
+        const cardId = currentCard.dataset.cardId;
         const newDescription = detailDescriptionInput.value.trim() || "Sem descrição.";
-        detailDescriptionDisplay.textContent = newDescription;
-        currentCard.querySelector(".ticket-description").textContent = newDescription;
+
+        try {
+          await apiFetch("/api/cards", {
+            method: "PATCH",
+            body: JSON.stringify({
+              id: cardId,
+              descricao: newDescription
+            })
+          });
+
+          await loadBoardFromApi(false);
+        } catch (error) {
+          showToast("Erro", error.message, "error");
+        }
       }
+
       detailDescriptionInput.classList.add("d-none");
       detailDescriptionDisplay.classList.remove("d-none");
+    }
+
+    function createColumnElement(coluna) {
+      const column = document.createElement("div");
+      column.className = "kanban-column";
+      column.dataset.columnId = coluna.id;
+      column.dataset.columnTitle = coluna.titulo;
+
+      column.innerHTML = `
+        <div class="kanban-column-header">
+          <h2>${coluna.titulo}</h2>
+          <strong>0</strong>
+        </div>
+        <div class="column-cards"></div>
+      `;
+
+      attachColumnEvents(column);
+      return column;
+    }
+
+    function createCardElement(card) {
+      const responsavelNome =
+        card.responsavel?.nome_exibicao ||
+        card.responsavel?.usuario ||
+        getUserNameById(card.responsavel_id);
+
+      const article = document.createElement("article");
+      article.className = "ticket-card ticket-open-modal";
+      article.setAttribute("draggable", "true");
+      article.dataset.cardId = card.id;
+      article.setAttribute("role", "button");
+      article.setAttribute("tabindex", "0");
+
+      article.innerHTML = `
+        <h3 class="ticket-title"></h3>
+        <p class="ticket-description"></p>
+        <div class="ticket-mini-info">
+          <span><i class="bi bi-person"></i> Quem pediu: ${card.quem_pediu}</span>
+          <span><i class="bi bi-person-check"></i> Responsável: ${responsavelNome}</span>
+        </div>
+      `;
+
+      article.querySelector(".ticket-title").textContent = card.titulo;
+      article.querySelector(".ticket-description").textContent = card.descricao;
+
+      attachCardEvents(article);
+      return article;
     }
 
     function attachCardEvents(card) {
@@ -1223,75 +1243,72 @@
       card.addEventListener("dragend", function () {
         card.classList.remove("dragging");
         draggedCard = null;
-        document.querySelectorAll(".kanban-column").forEach((column) => column.classList.remove("drag-over"));
+
+        document.querySelectorAll(".kanban-column").forEach((column) => {
+          column.classList.remove("drag-over");
+        });
       });
     }
 
     function attachColumnEvents(column) {
       const columnTitle = column.querySelector(".kanban-column-header h2");
 
-      if (columnTitle && !columnTitle.dataset.editBound) {
-        columnTitle.dataset.editBound = "true";
-        columnTitle.setAttribute("title", "Clique para editar o título da coluna");
-        columnTitle.setAttribute("spellcheck", "false");
+      columnTitle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        columnTitle.setAttribute("contenteditable", "true");
+        columnTitle.dataset.originalTitle = column.dataset.columnTitle;
+        columnTitle.focus();
 
-        columnTitle.addEventListener("click", function (e) {
-          e.stopPropagation();
-          columnTitle.setAttribute("contenteditable", "true");
-          columnTitle.dataset.originalTitle = column.dataset.columnTitle || columnTitle.textContent.trim();
-          columnTitle.focus();
+        const range = document.createRange();
+        range.selectNodeContents(columnTitle);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      });
 
-          const range = document.createRange();
-          range.selectNodeContents(columnTitle);
-          const selection = window.getSelection();
-          selection.removeAllRanges();
-          selection.addRange(range);
-        });
+      columnTitle.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          columnTitle.blur();
+        }
 
-        columnTitle.addEventListener("keydown", function (e) {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            columnTitle.blur();
-          }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          columnTitle.textContent = columnTitle.dataset.originalTitle || column.dataset.columnTitle;
+          columnTitle.blur();
+        }
+      });
 
-          if (e.key === "Escape") {
-            e.preventDefault();
-            columnTitle.textContent = columnTitle.dataset.originalTitle || column.dataset.columnTitle || "Coluna";
-            columnTitle.blur();
-          }
-        });
+      columnTitle.addEventListener("blur", async function () {
+        const oldTitle = column.dataset.columnTitle;
+        const newTitle = columnTitle.textContent.trim();
 
-        columnTitle.addEventListener("blur", function () {
-          const oldTitle = column.dataset.columnTitle || columnTitle.dataset.originalTitle || "Coluna";
-          const newTitle = columnTitle.textContent.trim();
+        columnTitle.removeAttribute("contenteditable");
 
-          columnTitle.removeAttribute("contenteditable");
+        if (!newTitle) {
+          columnTitle.textContent = oldTitle;
+          showToast("Campo obrigatório", "O título da coluna não pode ficar vazio.", "error");
+          return;
+        }
 
-          if (!newTitle) {
-            columnTitle.textContent = oldTitle;
-            showToast("Campo obrigatório", "O título da coluna não pode ficar vazio.", "error");
-            return;
-          }
+        if (oldTitle === newTitle) return;
 
-          const duplicateColumn = [...document.querySelectorAll(".kanban-column")].find((item) => {
-            return item !== column && item.dataset.columnTitle?.toLowerCase() === newTitle.toLowerCase();
+        try {
+          await apiFetch("/api/colunas", {
+            method: "PATCH",
+            body: JSON.stringify({
+              id: column.dataset.columnId,
+              titulo: newTitle
+            })
           });
 
-          if (duplicateColumn) {
-            columnTitle.textContent = oldTitle;
-            showToast("Coluna já existe", "Já existe uma coluna com esse título.", "error");
-            return;
-          }
-
-          column.dataset.columnTitle = newTitle;
-          column.dataset.defaultStatus = newTitle;
-          columnTitle.textContent = newTitle;
-
-          if (oldTitle !== newTitle) {
-            showToast("Coluna renomeada", `A coluna "${oldTitle}" agora se chama "${newTitle}".`, "success");
-          }
-        });
-      }
+          showToast("Coluna renomeada", `A coluna "${oldTitle}" agora se chama "${newTitle}".`, "success");
+          await loadBoardFromApi(false);
+        } catch (error) {
+          columnTitle.textContent = oldTitle;
+          showToast("Erro", error.message, "error");
+        }
+      });
 
       column.addEventListener("contextmenu", function (e) {
         if (e.target.closest(".ticket-card")) return;
@@ -1308,89 +1325,178 @@
         column.classList.remove("drag-over");
       });
 
-      column.addEventListener("drop", function (e) {
+      column.addEventListener("drop", async function (e) {
         e.preventDefault();
         column.classList.remove("drag-over");
+
         if (!draggedCard) return;
 
-        const oldColumn = draggedCard.closest(".kanban-column");
-        const oldTitle = oldColumn?.dataset.columnTitle || "";
-        const newTitle = column.dataset.columnTitle || "";
-        const cardsContainer = column.querySelector(".column-cards");
+        const cardId = draggedCard.dataset.cardId;
+        const colunaId = column.dataset.columnId;
 
-        if (!cardsContainer) return;
-        cardsContainer.appendChild(draggedCard);
+        try {
+          await apiFetch("/api/cards", {
+            method: "PATCH",
+            body: JSON.stringify({
+              id: cardId,
+              coluna_id: colunaId
+            })
+          });
 
-        if (oldTitle !== newTitle) {
-          addLogItem(draggedCard.dataset.cardId, `Movido para ${newTitle}`);
-          if (currentCard && currentCard.dataset.cardId === draggedCard.dataset.cardId) {
-            detailCurrentColumn.textContent = newTitle;
-          }
+          await loadBoardFromApi(false);
+        } catch (error) {
+          showToast("Erro", error.message, "error");
         }
-
-        updateColumnCounts();
       });
     }
 
-    function createCardElement({ title, description, requestedBy, responsible }) {
-      const card = document.createElement("article");
-      const id = `card-${cardCounter++}`;
-      card.className = "ticket-card ticket-open-modal";
-      card.setAttribute("draggable", "true");
-      card.dataset.cardId = id;
-      card.setAttribute("role", "button");
-      card.setAttribute("tabindex", "0");
-      card.innerHTML = `
-        <h3 class="ticket-title"></h3>
-        <p class="ticket-description"></p>
-        <div class="ticket-mini-info">
-          <span><i class="bi bi-person"></i> Quem pediu: </span>
-          <span><i class="bi bi-person-check"></i> Responsável: </span>
-        </div>
-      `;
-      card.querySelector(".ticket-title").textContent = title;
-      card.querySelector(".ticket-description").textContent = description;
-      const info = card.querySelectorAll(".ticket-mini-info span");
-      info[0].innerHTML = `<i class="bi bi-person"></i> Quem pediu: ${requestedBy}`;
-      info[1].innerHTML = `<i class="bi bi-person-check"></i> Responsável: ${responsible}`;
-      cardLogs[id] = [{ date: getCurrentDateTime(), text: "Card criado por Jean" }];
-      attachCardEvents(card);
-      return card;
+    async function loadUsersFromApi() {
+      try {
+        const data = await apiFetch("/api/usuarios");
+        users = data.usuarios || [];
+        renderResponsibleOptions();
+      } catch (error) {
+        users = [];
+      }
     }
 
-    function createColumnElement(title) {
-      const column = document.createElement("div");
-      column.className = "kanban-column";
-      column.dataset.columnTitle = title;
-      column.dataset.defaultStatus = title;
-      column.innerHTML = `
-        <div class="kanban-column-header">
-          <h2></h2>
-          <strong>0</strong>
-        </div>
-        <div class="column-cards"></div>
-      `;
-      column.querySelector("h2").textContent = title;
-      attachColumnEvents(column);
-      return column;
+    async function loadLogsFromApi() {
+      try {
+        const response = await fetch("/api/logs");
+
+        if (!response.ok) {
+          logs = [];
+          return;
+        }
+
+        const data = await response.json();
+        logs = data.logs || [];
+      } catch (error) {
+        logs = [];
+      }
     }
 
-    document.querySelectorAll(".kanban-column").forEach(attachColumnEvents);
-    document.querySelectorAll(".ticket-card").forEach(attachCardEvents);
-    targetColumnForNewCard = getColumnByTitle("A fazer") || document.querySelector(".kanban-column");
-    updateColumnCounts();
+    async function loadBoardFromApi(showLoadingToast = false) {
+      if (showLoadingToast) {
+        showToast("Carregando", "Atualizando quadro...", "info");
+      }
 
+      const [colunasData, cardsData] = await Promise.all([
+        apiFetch("/api/colunas"),
+        apiFetch("/api/cards")
+      ]);
+
+      if (!colunasData || !cardsData) return;
+
+      colunas = colunasData.colunas || [];
+      cards = cardsData.cards || [];
+
+      await loadLogsFromApi();
+
+      kanbanBoard.innerHTML = "";
+
+      colunas.forEach((coluna) => {
+        const columnElement = createColumnElement(coluna);
+        const cardsContainer = columnElement.querySelector(".column-cards");
+
+        cards
+          .filter((card) => card.coluna_id === coluna.id)
+          .forEach((card) => {
+            cardsContainer.appendChild(createCardElement(card));
+          });
+
+        kanbanBoard.appendChild(columnElement);
+      });
+
+      updateColumnCounts();
+
+      if (currentCard) {
+        const updatedCurrentCard = document.querySelector(`[data-card-id="${currentCard.dataset.cardId}"]`);
+        if (updatedCurrentCard) {
+          fillDetailsModal(updatedCurrentCard);
+        }
+      }
+    }
+
+async function startRealtime() {
+  try {
+    const response = await fetch("/api/realtime-config");
+    const config = await response.json().catch(() => ({}));
+
+    if (!response.ok || !config.ok) {
+      showToast(
+        "Realtime",
+        config.message || "Não foi possível buscar configuração do realtime.",
+        "error"
+      );
+      return;
+    }
+
+    if (!window.supabase) {
+      showToast("Realtime", "Biblioteca do Supabase não carregou.", "error");
+      return;
+    }
+
+    realtimeClient = window.supabase.createClient(
+      config.supabaseUrl,
+      config.supabaseAnonKey
+    );
+
+    realtimeClient
+      .channel("ch_dashboard_realtime_" + Math.random())
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "ch_realtime_ping"
+        },
+        async (payload) => {
+          console.log("PING REALTIME RECEBIDO:", payload);
+
+          await loadBoardFromApi(false);
+        }
+      )
+      .subscribe((status, err) => {
+        console.log("Realtime status:", status, err || "");
+
+        if (
+          status === "CHANNEL_ERROR" ||
+          status === "TIMED_OUT" ||
+          status === "CLOSED"
+        ) {
+          showToast(
+            "Realtime",
+            `Erro na conexão realtime: ${status}`,
+            "error"
+          );
+        }
+      });
+  } catch (error) {
+    console.error("Erro ao conectar realtime:", error);
+
+    showToast(
+      "Realtime",
+      error.message || "Erro ao conectar realtime.",
+      "error"
+    );
+  }
+}
     addCardFromContext.addEventListener("click", function () {
-      targetColumnForNewCard = activeColumn || getColumnByTitle("A fazer") || document.querySelector(".kanban-column");
+      targetColumnForNewCard = activeColumn;
       hideContextMenu();
+
       newCardForm.reset();
-      newCardResponsible.value = "Sem responsável";
+      newCardResponsible.value = "";
       modalNovoCard.show();
     });
 
-    removeColumnFromContext.addEventListener("click", function () {
+    removeColumnFromContext.addEventListener("click", async function () {
       if (!activeColumn) return;
-      const title = activeColumn.dataset.columnTitle || "esta coluna";
+
+      const id = activeColumn.dataset.columnId;
+      const title = activeColumn.dataset.columnTitle;
+
       const confirmed = await showConfirm({
         title: "Remover coluna",
         message: `Tem certeza que deseja remover a coluna "${title}"?`,
@@ -1402,16 +1508,27 @@
         hideContextMenu();
         return;
       }
-      activeColumn.remove();
-      activeColumn = null;
-      hideContextMenu();
-      updateColumnCounts();
-      showToast("Coluna removida", `A coluna "${title}" foi removida.`, "success");
+
+      try {
+        await apiFetch("/api/colunas", {
+          method: "DELETE",
+          body: JSON.stringify({ id })
+        });
+
+        hideContextMenu();
+        showToast("Coluna removida", `A coluna "${title}" foi removida.`, "success");
+        await loadBoardFromApi(false);
+      } catch (error) {
+        showToast("Erro", error.message, "error");
+      }
     });
 
-    removeCardFromContext.addEventListener("click", function () {
+    removeCardFromContext.addEventListener("click", async function () {
       if (!activeCard) return;
+
+      const id = activeCard.dataset.cardId;
       const title = activeCard.querySelector(".ticket-title")?.textContent?.trim() || "este card";
+
       const confirmed = await showConfirm({
         title: "Excluir card",
         message: `Tem certeza que deseja excluir o card "${title}"?`,
@@ -1423,32 +1540,43 @@
         hideContextMenu();
         return;
       }
-      delete cardLogs[activeCard.dataset.cardId];
-      activeCard.remove();
-      activeCard = null;
-      hideContextMenu();
-      updateColumnCounts();
-      showToast("Card excluído", `O card "${title}" foi removido.`, "success");
+
+      try {
+        await apiFetch("/api/cards", {
+          method: "DELETE",
+          body: JSON.stringify({ id })
+        });
+
+        hideContextMenu();
+        showToast("Card excluído", `O card "${title}" foi removido.`, "success");
+        await loadBoardFromApi(false);
+      } catch (error) {
+        showToast("Erro", error.message, "error");
+      }
     });
 
-    saveNewColumnBtn.addEventListener("click", function () {
-      const title = newColumnTitle.value.trim();
-      if (!title) {
+    saveNewColumnBtn.addEventListener("click", async function () {
+      const titulo = newColumnTitle.value.trim();
+
+      if (!titulo) {
         showToast("Campo obrigatório", "Preencha o título da coluna.", "error");
         newColumnTitle.focus();
         return;
       }
-      if (getColumnByTitle(title)) {
-        showToast("Coluna já existe", "Já existe uma coluna com esse título.", "error");
-        newColumnTitle.focus();
-        return;
+
+      try {
+        await apiFetch("/api/colunas", {
+          method: "POST",
+          body: JSON.stringify({ titulo })
+        });
+
+        newColumnForm.reset();
+        modalNovaColuna.hide();
+        showToast("Coluna criada", `A coluna "${titulo}" foi adicionada.`, "success");
+        await loadBoardFromApi(false);
+      } catch (error) {
+        showToast("Erro", error.message, "error");
       }
-      const column = createColumnElement(title);
-      kanbanBoard.appendChild(column);
-      newColumnForm.reset();
-      modalNovaColuna.hide();
-      updateColumnCounts();
-      showToast("Coluna criada", `A coluna "${title}" foi adicionada.`, "success");
     });
 
     newColumnForm.addEventListener("submit", function (e) {
@@ -1456,43 +1584,55 @@
       saveNewColumnBtn.click();
     });
 
-    saveNewCardBtn.addEventListener("click", function () {
-      const title = newCardTitle.value.trim();
-      const description = newCardDescription.value.trim();
-      const requestedBy = newCardRequestedBy.value.trim();
-      const responsible = newCardResponsible.value;
-      if (!title) {
+    saveNewCardBtn.addEventListener("click", async function () {
+      const titulo = newCardTitle.value.trim();
+      const descricao = newCardDescription.value.trim();
+      const quem_pediu = newCardRequestedBy.value.trim();
+      const responsavel_id = newCardResponsible.value || null;
+
+      if (!titulo) {
         showToast("Campo obrigatório", "Preencha o título do card.", "error");
         newCardTitle.focus();
         return;
       }
-      if (!description) {
+
+      if (!descricao) {
         showToast("Campo obrigatório", "Preencha a descrição do card.", "error");
         newCardDescription.focus();
         return;
       }
-      if (!requestedBy) {
+
+      if (!quem_pediu) {
         showToast("Campo obrigatório", "Preencha quem pediu o card.", "error");
         newCardRequestedBy.focus();
         return;
       }
-      const targetColumn = targetColumnForNewCard || getColumnByTitle("A fazer") || document.querySelector(".kanban-column");
-      if (!targetColumn) {
-        showToast("Erro", "Crie uma coluna antes de salvar um card.", "error");
+
+      if (!targetColumnForNewCard) {
+        showToast("Erro", "Nenhuma coluna selecionada para criar o card.", "error");
         return;
       }
-      const cardsContainer = targetColumn.querySelector(".column-cards");
-      if (!cardsContainer) {
-        showToast("Erro", "A coluna selecionada está inválida.", "error");
-        return;
+
+      try {
+        await apiFetch("/api/cards", {
+          method: "POST",
+          body: JSON.stringify({
+            coluna_id: targetColumnForNewCard.dataset.columnId,
+            titulo,
+            descricao,
+            quem_pediu,
+            responsavel_id
+          })
+        });
+
+        newCardForm.reset();
+        newCardResponsible.value = "";
+        modalNovoCard.hide();
+        showToast("Card criado", "O card foi criado na coluna selecionada.", "success");
+        await loadBoardFromApi(false);
+      } catch (error) {
+        showToast("Erro", error.message, "error");
       }
-      const card = createCardElement({ title, description, requestedBy, responsible });
-      cardsContainer.appendChild(card);
-      updateColumnCounts();
-      newCardForm.reset();
-      newCardResponsible.value = "Sem responsável";
-      modalNovoCard.hide();
-      showToast("Card criado", "O card foi criado na coluna selecionada.", "success");
     });
 
     newCardForm.addEventListener("submit", function (e) {
@@ -1501,31 +1641,37 @@
     });
 
     detailTitleDisplay.addEventListener("click", openTitleEditor);
+
     detailTitleInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
         closeTitleEditor(true);
       }
+
       if (e.key === "Escape") {
         e.preventDefault();
         closeTitleEditor(false);
       }
     });
+
     detailTitleInput.addEventListener("blur", function () {
       closeTitleEditor(true);
     });
 
     detailDescriptionDisplay.addEventListener("click", openDescriptionEditor);
+
     detailDescriptionInput.addEventListener("keydown", function (e) {
       if (e.key === "Escape") {
         e.preventDefault();
         closeDescriptionEditor(false);
       }
+
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
         closeDescriptionEditor(true);
       }
     });
+
     detailDescriptionInput.addEventListener("blur", function () {
       closeDescriptionEditor(true);
     });
@@ -1539,9 +1685,19 @@
     document.addEventListener("scroll", hideContextMenu, true);
     window.addEventListener("resize", hideContextMenu);
     window.addEventListener("blur", hideContextMenu);
+
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") hideContextMenu();
     });
+
+    async function init() {
+      await requireLogin();
+      await loadUsersFromApi();
+      await loadBoardFromApi(false);
+      await startRealtime();
+    }
+
+    init();
   </script>
 </body>
 </html>
