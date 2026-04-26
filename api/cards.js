@@ -16,12 +16,22 @@ export default async function handler(req, res) {
       .order("ordem", { ascending: true })
       .order("criado_em", { ascending: true });
 
-    if (error) return res.status(500).json({ ok: false, message: "Erro ao buscar cards." });
-    return res.status(200).json({ ok: true, cards: data });
+    if (error) {
+      return res.status(500).json({
+        ok: false,
+        message: "Erro ao buscar cards."
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      cards: data
+    });
   }
 
   if (req.method === "POST") {
     const body = await readJson(req);
+
     const coluna_id = body.coluna_id;
     const titulo = String(body.titulo || "").trim();
     const descricao = String(body.descricao || "").trim();
@@ -29,7 +39,10 @@ export default async function handler(req, res) {
     const responsavel_id = body.responsavel_id || null;
 
     if (!coluna_id || !titulo || !descricao || !quem_pediu) {
-      return res.status(400).json({ ok: false, message: "Preencha os dados obrigatórios do card." });
+      return res.status(400).json({
+        ok: false,
+        message: "Preencha os dados obrigatórios do card."
+      });
     }
 
     const { data: ultimo } = await supabase
@@ -40,15 +53,28 @@ export default async function handler(req, res) {
       .limit(1)
       .maybeSingle();
 
-    const ordem = (ultimo?.ordem || 0) + 1;
+    const ordem = ultimo?.ordem ? ultimo.ordem + 1 : 1;
 
     const { data: card, error } = await supabase
       .from("ch_cards")
-      .insert({ coluna_id, titulo, descricao, quem_pediu, responsavel_id, ordem, criado_por: user.id })
+      .insert({
+        coluna_id,
+        titulo,
+        descricao,
+        quem_pediu,
+        responsavel_id,
+        ordem,
+        criado_por: user.id
+      })
       .select("*")
       .single();
 
-    if (error) return res.status(500).json({ ok: false, message: "Erro ao criar card." });
+    if (error) {
+      return res.status(500).json({
+        ok: false,
+        message: "Erro ao criar card."
+      });
+    }
 
     await supabase.from("ch_logs").insert({
       card_id: card.id,
@@ -56,14 +82,22 @@ export default async function handler(req, res) {
       acao: `Card criado por ${user.nome_exibicao}`
     });
 
-    return res.status(200).json({ ok: true, card });
+    return res.status(200).json({
+      ok: true,
+      card
+    });
   }
 
   if (req.method === "PATCH") {
     const body = await readJson(req);
     const id = body.id;
 
-    if (!id) return res.status(400).json({ ok: false, message: "ID do card não informado." });
+    if (!id) {
+      return res.status(400).json({
+        ok: false,
+        message: "ID do card não informado."
+      });
+    }
 
     const { data: oldCard } = await supabase
       .from("ch_cards")
@@ -72,12 +106,30 @@ export default async function handler(req, res) {
       .single();
 
     const payload = {};
-    if (body.titulo !== undefined) payload.titulo = String(body.titulo).trim();
-    if (body.descricao !== undefined) payload.descricao = String(body.descricao).trim();
-    if (body.quem_pediu !== undefined) payload.quem_pediu = String(body.quem_pediu).trim();
-    if (body.responsavel_id !== undefined) payload.responsavel_id = body.responsavel_id || null;
-    if (body.coluna_id !== undefined) payload.coluna_id = body.coluna_id;
-    if (body.ordem !== undefined) payload.ordem = body.ordem;
+
+    if (body.titulo !== undefined) {
+      payload.titulo = String(body.titulo || "").trim();
+    }
+
+    if (body.descricao !== undefined) {
+      payload.descricao = String(body.descricao || "").trim();
+    }
+
+    if (body.quem_pediu !== undefined) {
+      payload.quem_pediu = String(body.quem_pediu || "").trim();
+    }
+
+    if (body.responsavel_id !== undefined) {
+      payload.responsavel_id = body.responsavel_id || null;
+    }
+
+    if (body.coluna_id !== undefined) {
+      payload.coluna_id = body.coluna_id;
+    }
+
+    if (body.ordem !== undefined) {
+      payload.ordem = body.ordem;
+    }
 
     const { data: card, error } = await supabase
       .from("ch_cards")
@@ -86,9 +138,14 @@ export default async function handler(req, res) {
       .select("*, coluna:ch_colunas(id, titulo)")
       .single();
 
-    if (error) return res.status(500).json({ ok: false, message: "Erro ao atualizar card." });
+    if (error) {
+      return res.status(500).json({
+        ok: false,
+        message: "Erro ao atualizar card."
+      });
+    }
 
-    if (body.coluna_id && oldCard?.coluna_id !== body.coluna_id) {
+    if (payload.coluna_id && oldCard?.coluna_id !== payload.coluna_id) {
       await supabase.from("ch_logs").insert({
         card_id: id,
         usuario_id: user.id,
@@ -96,20 +153,42 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({ ok: true, card });
+    return res.status(200).json({
+      ok: true,
+      card
+    });
   }
 
   if (req.method === "DELETE") {
     const body = await readJson(req);
     const id = body.id;
 
-    if (!id) return res.status(400).json({ ok: false, message: "ID do card não informado." });
+    if (!id) {
+      return res.status(400).json({
+        ok: false,
+        message: "ID do card não informado."
+      });
+    }
 
-    const { error } = await supabase.from("ch_cards").delete().eq("id", id);
+    const { error } = await supabase
+      .from("ch_cards")
+      .delete()
+      .eq("id", id);
 
-    if (error) return res.status(500).json({ ok: false, message: "Erro ao excluir card." });
-    return res.status(200).json({ ok: true });
+    if (error) {
+      return res.status(500).json({
+        ok: false,
+        message: "Erro ao excluir card."
+      });
+    }
+
+    return res.status(200).json({
+      ok: true
+    });
   }
 
-  return res.status(405).json({ ok: false, message: "Método não permitido." });
+  return res.status(405).json({
+    ok: false,
+    message: "Método não permitido."
+  });
 }
