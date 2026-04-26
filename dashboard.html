@@ -265,6 +265,47 @@
       box-shadow: none;
     }
 
+    .column-title-wrap {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .column-date-label {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      line-height: 1;
+      padding-left: 1px;
+    }
+
+    .kanban-column[data-column-type="data"] {
+      border-color: rgba(56, 189, 248, 0.22);
+    }
+
+    .kanban-column[data-column-type="data"] .kanban-column-header h2::before {
+      content: "\F214";
+      font-family: "bootstrap-icons";
+      font-size: 0.78rem;
+      color: #7dd3fc;
+      margin-right: 6px;
+      font-weight: 400;
+    }
+
+    .create-menu {
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 14px;
+      padding: 8px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.42);
+    }
+
+    .create-menu .dropdown-item {
+      border-radius: 10px;
+      font-size: 0.88rem;
+      padding: 9px 11px;
+    }
+
     .kanban-column-header strong {
       background: #3a3c43;
       color: #c9cdfb;
@@ -736,14 +777,30 @@
           </ul>
         </div>
 
-        <button
-          class="btn btn-icon-create"
-          data-bs-toggle="modal"
-          data-bs-target="#modalNovaColuna"
-          title="Criar coluna"
-        >
-          <i class="bi bi-plus-lg"></i>
-        </button>
+        <div class="dropdown">
+          <button
+            class="btn btn-icon-create dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="Criar"
+          >
+            <i class="bi bi-plus-lg"></i>
+          </button>
+
+          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end create-menu">
+            <li>
+              <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#modalNovaColuna">
+                <i class="bi bi-columns-gap me-2"></i>Criar coluna
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#modalGrupoData">
+                <i class="bi bi-calendar-event me-2"></i>Criar grupo por data
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -795,6 +852,38 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-danger fw-bold" id="confirmOkBtn">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalGrupoData" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Criar grupo por data</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+
+        <div class="modal-body">
+          <form id="newDateGroupForm" class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Título do grupo</label>
+              <input type="text" class="form-control" id="newDateGroupTitle" placeholder="Ex: Hoje" />
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Data</label>
+              <input type="date" class="form-control" id="newDateGroupDate" />
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-info fw-bold" id="saveNewDateGroupBtn">
+            <i class="bi bi-save me-1"></i> Salvar grupo
+          </button>
         </div>
       </div>
     </div>
@@ -941,6 +1030,7 @@
 
     const modalNovoCard = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovoCard"));
     const modalNovaColuna = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNovaColuna"));
+    const modalGrupoData = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalGrupoData"));
     const modalDetalhesCard = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDetalhesCard"));
     const modalConfirmacaoEl = document.getElementById("modalConfirmacao");
     const modalConfirmacao = bootstrap.Modal.getOrCreateInstance(modalConfirmacaoEl);
@@ -951,6 +1041,10 @@
     const newColumnForm = document.getElementById("newColumnForm");
     const newColumnTitle = document.getElementById("newColumnTitle");
     const saveNewColumnBtn = document.getElementById("saveNewColumnBtn");
+    const newDateGroupForm = document.getElementById("newDateGroupForm");
+    const newDateGroupTitle = document.getElementById("newDateGroupTitle");
+    const newDateGroupDate = document.getElementById("newDateGroupDate");
+    const saveNewDateGroupBtn = document.getElementById("saveNewDateGroupBtn");
 
     const newCardForm = document.getElementById("newCardForm");
     const newCardTitle = document.getElementById("newCardTitle");
@@ -1274,15 +1368,31 @@
       detailDescriptionDisplay.classList.remove("d-none");
     }
 
+    function formatDateBR(dateString) {
+      if (!dateString) return "";
+      const parts = String(dateString).split("-");
+      if (parts.length !== 3) return "";
+      return parts[2] + "/" + parts[1] + "/" + parts[0];
+    }
+
     function createColumnElement(coluna) {
       const column = document.createElement("div");
       column.className = "kanban-column";
       column.dataset.columnId = coluna.id;
       column.dataset.columnTitle = coluna.titulo;
+      column.dataset.columnType = coluna.tipo || "status";
+      column.dataset.columnDate = coluna.data_referencia || "";
+
+      const dateLabel = coluna.tipo === "data" && coluna.data_referencia
+        ? '<small class="column-date-label">' + formatDateBR(coluna.data_referencia) + '</small>'
+        : "";
 
       column.innerHTML = `
         <div class="kanban-column-header">
-          <h2>${coluna.titulo}</h2>
+          <div class="column-title-wrap">
+            <h2>${coluna.titulo}</h2>
+            ${dateLabel}
+          </div>
           <strong>0</strong>
         </div>
         <div class="column-cards"></div>
@@ -1673,7 +1783,7 @@ async function startRealtime() {
       try {
         await apiFetch("/api/colunas", {
           method: "POST",
-          body: JSON.stringify({ titulo })
+          body: JSON.stringify({ titulo, tipo: "status", data_referencia: null })
         });
 
         newColumnForm.reset();
@@ -1683,6 +1793,49 @@ async function startRealtime() {
       } catch (error) {
         showToast("Erro", error.message, "error");
       }
+    });
+
+    saveNewDateGroupBtn.addEventListener("click", async function () {
+      const titulo = newDateGroupTitle.value.trim();
+      const data_referencia = newDateGroupDate.value;
+
+      if (!titulo) {
+        showToast("Campo obrigatório", "Preencha o título do grupo por data.", "error");
+        newDateGroupTitle.focus();
+        return;
+      }
+
+      if (!data_referencia) {
+        showToast("Campo obrigatório", "Selecione a data do grupo.", "error");
+        newDateGroupDate.focus();
+        return;
+      }
+
+      try {
+        await apiFetch("/api/colunas", {
+          method: "POST",
+          body: JSON.stringify({ titulo, tipo: "data", data_referencia })
+        });
+
+        newDateGroupForm.reset();
+        modalGrupoData.hide();
+        showToast("Grupo criado", 'O grupo "' + titulo + '" foi adicionado.', "success");
+        await loadBoardFromApi(false);
+      } catch (error) {
+        showToast("Erro", error.message, "error");
+      }
+    });
+
+    newDateGroupForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      saveNewDateGroupBtn.click();
+    });
+
+    document.getElementById("modalGrupoData").addEventListener("shown.bs.modal", function () {
+      if (!newDateGroupDate.value) {
+        newDateGroupDate.value = new Date().toISOString().slice(0, 10);
+      }
+      newDateGroupTitle.focus();
     });
 
     newColumnForm.addEventListener("submit", function (e) {
