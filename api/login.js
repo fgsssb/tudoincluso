@@ -1,32 +1,44 @@
+const bcrypt = require('bcryptjs');
 const { supabase } = require('./_supabase');
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST')
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método inválido' });
+  }
 
   const { login, senha } = req.body || {};
 
-  if (!login || !senha)
+  if (!login || !senha) {
     return res.status(400).json({ error: 'Informe usuário e senha' });
+  }
 
   try {
     const sb = supabase();
 
+    const loginLimpo = String(login).trim().toLowerCase();
+
     const { data, error } = await sb
       .from('ti_users')
-      .select('id,nome,login,cargo,senha,ativo,deletado')
-      .eq('login', login.trim().toLowerCase())
+      .select('id,nome,login,cargo,password_hash,ativo')
+      .eq('login', loginLimpo)
       .single();
 
-    if (error || !data || !data.ativo || data.deletado === true || data.senha !== senha) {
+    if (error || !data || data.ativo !== true) {
       return res.status(401).json({ error: 'Usuário ou senha inválidos' });
     }
 
-    delete data.senha;
+    const senhaCorreta = await bcrypt.compare(String(senha), data.password_hash);
 
-    return res.json({ user: data });
+    if (!senhaCorreta) {
+      return res.status(401).json({ error: 'Usuário ou senha inválidos' });
+    }
+
+    delete data.password_hash;
+
+    return res.status(200).json({ user: data });
 
   } catch (e) {
+    console.error('ERRO LOGIN:', e);
     return res.status(500).json({ error: e.message });
   }
 };
