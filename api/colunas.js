@@ -82,6 +82,41 @@ export default async function handler(req, res) {
 
   if (req.method === "PATCH") {
     const body = await readJson(req);
+
+    if (Array.isArray(body.ordens)) {
+      const ordens = body.ordens
+        .filter((item) => item && item.id && Number.isFinite(Number(item.ordem)))
+        .map((item) => ({ id: item.id, ordem: Number(item.ordem) }));
+
+      if (!ordens.length) {
+        return res.status(400).json({
+          ok: false,
+          message: "Nenhuma ordem válida foi enviada."
+        });
+      }
+
+      const updates = ordens.map((item) =>
+        supabase
+          .from("ch_colunas")
+          .update({ ordem: item.ordem })
+          .eq("id", item.id)
+      );
+
+      const results = await Promise.all(updates);
+      const failed = results.find((result) => result.error);
+
+      if (failed) {
+        return res.status(500).json({
+          ok: false,
+          message: "Erro ao salvar a ordem das colunas."
+        });
+      }
+
+      return res.status(200).json({
+        ok: true
+      });
+    }
+
     const id = body.id;
     const titulo = String(body.titulo || "").trim();
 
