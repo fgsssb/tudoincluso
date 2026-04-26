@@ -1360,42 +1360,88 @@
       }
     }
 
-    async function startRealtime() {
-      try {
-        const response = await fetch("/api/realtime-config");
+async function startRealtime() {
+  try {
+    const response = await fetch("/api/realtime-config");
+    const config = await response.json().catch(() => ({}));
 
-        if (!response.ok) {
-          showToast("Realtime", "Não foi possível iniciar o realtime.", "error");
-          return;
+    if (!response.ok || !config.ok) {
+      showToast(
+        "Realtime",
+        config.message || "Não foi possível buscar configuração do realtime.",
+        "error"
+      );
+      return;
+    }
+
+    if (!window.supabase) {
+      showToast(
+        "Realtime",
+        "Biblioteca do Supabase não carregou.",
+        "error"
+      );
+      return;
+    }
+
+    realtimeClient = window.supabase.createClient(
+      config.supabaseUrl,
+      config.supabaseAnonKey
+    );
+
+    realtimeClient
+      .channel("ch_dashboard_realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ch_realtime_ping"
+        },
+        async (payload) => {
+          console.log("PING REALTIME RECEBIDO:", payload);
+
+          await loadBoardFromApi(false);
+
+          showToast(
+            "Quadro atualizado",
+            "Alteração recebida em tempo real.",
+            "success"
+          );
+        }
+      )
+      .subscribe((status) => {
+        console.log("Realtime status:", status);
+
+        if (status === "SUBSCRIBED") {
+          showToast(
+            "Realtime",
+            "Sincronização em tempo real ativada.",
+            "success"
+          );
         }
 
-        const config = await response.json();
+        if (
+          status === "CHANNEL_ERROR" ||
+          status === "TIMED_OUT" ||
+          status === "CLOSED"
+        ) {
+          showToast(
+            "Realtime",
+            `Erro na conexão realtime: ${status}`,
+            "error"
+          );
+        }
+      });
+  } catch (error) {
+    console.error("Erro ao conectar realtime:", error);
 
-        realtimeClient = window.supabase.createClient(
-          config.supabaseUrl,
-          config.supabaseAnonKey
-        );
-
-        realtimeClient
-          .channel("ch_dashboard_realtime")
-          .on(
-            "postgres_changes",
-            {
-              event: "INSERT",
-              schema: "public",
-              table: "ch_realtime_ping"
-            },
-            async () => {
-              await loadBoardFromApi(false);
-            }
-          )
-          .subscribe((status) => {
-            console.log("Realtime status:", status);
-          });
-      } catch (error) {
-        showToast("Realtime", "Erro ao conectar realtime.", "error");
-      }
-    }
+    showToast(
+      "Realtime",
+      error.message || "Erro ao conectar realtime.",
+      "error"
+    );
+  }
+}
 
     addCardFromContext.addEventListener("click", function () {
       targetColumnForNewCard = activeColumn;
