@@ -1,5 +1,16 @@
 import { supabase, readJson, requireUser } from "./_utils.js";
 
+const VALID_TYPES = new Set(["chamado", "categoria_data", "categoria_texto"]);
+
+function normalizeTipo(value) {
+  const tipo = String(value || "chamado").trim();
+  return VALID_TYPES.has(tipo) ? tipo : "chamado";
+}
+
+function isCategoria(tipo) {
+  return tipo === "categoria_data" || tipo === "categoria_texto";
+}
+
 export default async function handler(req, res) {
   const user = await requireUser(req, res);
   if (!user) return;
@@ -33,13 +44,13 @@ export default async function handler(req, res) {
     const body = await readJson(req);
 
     const coluna_id = body.coluna_id;
-    const tipo = body.tipo === "categoria_data" ? "categoria_data" : "chamado";
+    const tipo = normalizeTipo(body.tipo);
     const titulo = String(body.titulo || "").trim();
     const descricao = String(body.descricao || "").trim();
     const quem_pediu = String(body.quem_pediu || "").trim();
     const responsavel_id = body.responsavel_id || null;
-    const categoria_id = body.categoria_id || null;
-    const data_referencia = body.data_referencia || null;
+    const categoria_id = isCategoria(tipo) ? null : (body.categoria_id || null);
+    const data_referencia = tipo === "categoria_data" ? (body.data_referencia || null) : null;
 
     if (!coluna_id || !titulo) {
       return res.status(400).json({
@@ -77,9 +88,9 @@ export default async function handler(req, res) {
       .insert({
         coluna_id,
         titulo,
-        descricao: tipo === "categoria_data" ? "" : descricao,
-        quem_pediu: tipo === "categoria_data" ? "Categoria de data" : quem_pediu,
-        responsavel_id,
+        descricao: isCategoria(tipo) ? "" : descricao,
+        quem_pediu: isCategoria(tipo) ? "Categoria" : quem_pediu,
+        responsavel_id: isCategoria(tipo) ? null : responsavel_id,
         categoria_id,
         data_referencia,
         tipo,
@@ -96,12 +107,16 @@ export default async function handler(req, res) {
       });
     }
 
+    const logMessage = tipo === "categoria_data"
+      ? `Categoria de data criada por ${user.nome_exibicao}`
+      : tipo === "categoria_texto"
+        ? `Categoria criada por ${user.nome_exibicao}`
+        : `Card criado por ${user.nome_exibicao}`;
+
     await supabase.from("ch_logs").insert({
       card_id: card.id,
       usuario_id: user.id,
-      acao: tipo === "categoria_data"
-        ? `Categoria de data criada por ${user.nome_exibicao}`
-        : `Card criado por ${user.nome_exibicao}`
+      acao: logMessage
     });
 
     return res.status(200).json({
@@ -137,7 +152,7 @@ export default async function handler(req, res) {
     if (body.ordem !== undefined) payload.ordem = body.ordem;
     if (body.categoria_id !== undefined) payload.categoria_id = body.categoria_id || null;
     if (body.data_referencia !== undefined) payload.data_referencia = body.data_referencia || null;
-    if (body.tipo !== undefined) payload.tipo = body.tipo === "categoria_data" ? "categoria_data" : "chamado";
+    if (body.tipo !== undefined) payload.tipo = normalizeTipo(body.tipo);
 
     const { data: card, error } = await supabase
       .from("ch_cards")
@@ -165,7 +180,7 @@ export default async function handler(req, res) {
       await supabase.from("ch_logs").insert({
         card_id: id,
         usuario_id: user.id,
-        acao: payload.categoria_id ? "Vinculado a uma categoria de data" : "Removido da categoria de data"
+        acao: payload.categoria_id ? "Vinculado a uma categoria" : "Removido da categoria"
       });
     }
 
