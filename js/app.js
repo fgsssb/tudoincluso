@@ -5,14 +5,12 @@ const STORAGE_KEY = 'pj1_tickets_cache_v2';
 const LOGIN_URL = '/index.html';
 
 const LIMITS = Object.freeze({ title: 90, requester: 60, description: 800 });
-const ALLOWED_STATUSES = Object.freeze(['concluido', 'andamento', 'pendente', 'suporte']);
-
-const statusMap = Object.freeze({
-  concluido: { text: 'Concluído', className: 'done' },
-  andamento: { text: 'Em andamento', className: 'progress' },
-  pendente: { text: 'Pendente - Conferir descrição', className: 'pending' },
-  suporte: { text: 'Aguardando suporte', className: 'support' }
-});
+let statuses = [
+  { codigo: 'concluido', nome: 'Concluído', cor: '#39d98a', ordem: 10, protegido: true },
+  { codigo: 'andamento', nome: 'Em andamento', cor: '#6ea8ff', ordem: 20, protegido: true },
+  { codigo: 'pendente', nome: 'Pendente - Conferir descrição', cor: '#f5c542', ordem: 30, protegido: true },
+  { codigo: 'suporte', nome: 'Aguardando suporte', cor: '#ff6b6b', ordem: 40, protegido: true }
+];
 
 let tickets = [];
 let selectedTicketId = null;
@@ -24,11 +22,35 @@ let currentUser = null;
 let searchOpen = false;
 
 function getStatusInfo(status) {
-  return statusMap[status] || statusMap.concluido;
+  return statuses.find((item) => item.codigo === status) || statuses[0];
+}
+
+function getStatusStyle(status) {
+  const info = getStatusInfo(status);
+  return `style="color: ${escapeHtml(info.cor || '#8c96a8')}"`;
 }
 
 function isValidStatus(status) {
-  return ALLOWED_STATUSES.includes(status);
+  return statuses.some((item) => item.codigo === status);
+}
+
+function renderStatusOptions(selectId, selectedValue = 'concluido', options = {}) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+
+  const list = options.exclude
+    ? statuses.filter((item) => !options.exclude.includes(item.codigo))
+    : statuses;
+
+  select.innerHTML = list
+    .map((item) => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`)
+    .join('');
+
+  if (list.some((item) => item.codigo === selectedValue)) {
+    select.value = selectedValue;
+  } else if (list[0]) {
+    select.value = list[0].codigo;
+  }
 }
 
 function brDateToInputDate(value) {
@@ -59,7 +81,7 @@ function getFilteredTickets() {
 
   return tickets.filter((ticket) => {
     const normalized = normalizeTicket(ticket);
-    const statusText = getStatusInfo(normalized.status).text;
+    const statusText = getStatusInfo(normalized.status).nome;
 
     const searchMap = {
       titulo: normalized.titulo,
@@ -263,6 +285,163 @@ async function apiRequest(path, options = {}) {
   return data;
 }
 
+async function loadStatuses() {
+  try {
+    const data = await apiRequest('/api/statuses', { method: 'GET' });
+
+    if (Array.isArray(data.statuses) && data.statuses.length) {
+      statuses = data.statuses.map((item) => ({
+        codigo: sanitizeText(item.codigo, 60),
+        nome: sanitizeText(item.nome, 50),
+        cor: /^#[0-9a-fA-F]{6}$/.test(item.cor || '') ? item.cor : '#8c96a8',
+        ordem: Number(item.ordem || 100),
+        protegido: Boolean(item.protegido)
+      }));
+    }
+
+    renderStatusOptions('newStatus', 'concluido');
+    renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
+  } catch {
+    notify('Não foi possível carregar a lista de status.');
+  }
+}
+
+function renderStatusList() {
+  const list = document.getElementById('statusList');
+  if (!list) return;
+
+  list.innerHTML = statuses.map((item) => [
+    '<div class="status-list-item">',
+      '<span class="status-list-left">',
+        '<span class="status-color-dot" style="background:', escapeHtml(item.cor), '"></span>',
+        '<span class="status-list-name">', escapeHtml(item.nome), '</span>',
+      '</span>',
+      item.protegido ? '<span class="status-lock">padrão</span>' : '<span class="status-lock">custom</span>',
+    '</div>'
+  ].join('')).join('');
+}
+
+function renderStatusRemoveList() {
+  const list = document.getElementById('statusRemoveList');
+  if (!list) return;
+
+  list.innerHTML = statuses.map((item) => [
+    '<div class="status-remove-item">',
+      '<span class="status-remove-left">',
+        '<span class="status-color-dot" style="background:', escapeHtml(item.cor), '"></span>',
+        '<span class="status-remove-name">', escapeHtml(item.nome), '</span>',
+      '</span>',
+      '<button class="status-remove-btn" type="button" data-status-code="', escapeHtml(item.codigo), '" ', item.protegido ? 'disabled title="Status padrão não pode ser removido"' : 'title="Remover status"', '>×</button>',
+    '</div>'
+  ].join('')).join('');
+}
+
+function openStatusManager() {
+  openBackdrop('statusManagerBackdrop');
+}
+
+function closeStatusManager() {
+  closeBackdrop('statusManagerBackdrop');
+}
+
+function openStatusList() {
+  renderStatusList();
+  closeStatusManager();
+  openBackdrop('statusListBackdrop');
+}
+
+function closeStatusList() {
+  closeBackdrop('statusListBackdrop');
+}
+
+function openStatusManage() {
+  renderStatusRemoveList();
+  closeStatusManager();
+  openBackdrop('statusManageBackdrop');
+}
+
+function closeStatusManage() {
+  closeBackdrop('statusManageBackdrop');
+  document.getElementById('newStatusName').value = '';
+  document.getElementById('newStatusColor').value = '#8c96a8';
+  document.getElementById('newStatusColorText').textContent = '#8c96a8';
+}
+
+async function addCustomStatus() {
+  const nome = sanitizeText(document.getElementById('newStatusName').value, 50);
+  const cor = document.getElementById('newStatusColor').value;
+
+  if (!nome) {
+    notify('Informe o nome do status.');
+    return;
+  }
+
+  try {
+    const data = await apiRequest('/api/statuses', {
+      method: 'POST',
+      body: JSON.stringify({ nome, cor })
+    });
+
+    if (Array.isArray(data.statuses)) {
+      statuses = data.statuses;
+    } else if (data.status) {
+      statuses.push(data.status);
+    }
+
+    renderStatusOptions('newStatus', data.status?.codigo || 'concluido');
+    renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
+    renderStatusRemoveList();
+    render();
+    document.getElementById('newStatusName').value = '';
+    notify('Status adicionado.');
+  } catch (error) {
+    notify(error.message || 'Erro ao adicionar status.');
+  }
+}
+
+let pendingStatusDeleteCode = null;
+
+function askRemoveStatus(codigo) {
+  const status = statuses.find((item) => item.codigo === codigo);
+  if (!status || status.protegido) return;
+
+  pendingStatusDeleteCode = codigo;
+  document.getElementById('statusDeleteConfirmText').textContent =
+    `Tem certeza que deseja remover o status "${status.nome}"?`;
+  openBackdrop('statusDeleteConfirmBackdrop');
+}
+
+function closeStatusDeleteConfirm() {
+  closeBackdrop('statusDeleteConfirmBackdrop');
+  pendingStatusDeleteCode = null;
+}
+
+async function confirmRemoveStatus() {
+  if (!pendingStatusDeleteCode) return;
+
+  try {
+    const data = await apiRequest('/api/statuses', {
+      method: 'DELETE',
+      body: JSON.stringify({ codigo: pendingStatusDeleteCode })
+    });
+
+    if (Array.isArray(data.statuses)) {
+      statuses = data.statuses;
+    } else {
+      statuses = statuses.filter((item) => item.codigo !== pendingStatusDeleteCode);
+    }
+
+    renderStatusOptions('newStatus', 'concluido');
+    renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
+    renderStatusRemoveList();
+    render();
+    closeStatusDeleteConfirm();
+    notify('Status removido.');
+  } catch (error) {
+    notify(error.message || 'Erro ao remover status.');
+  }
+}
+
 async function loadTicketsFromServer() {
   try {
     const data = await apiRequest('/api/tickets', { method: 'GET' });
@@ -437,17 +616,16 @@ function openStatusChangeModal() {
   const ticket = getSelectedTicket();
   if (!ticket || ticket.status !== 'pendente') return;
 
-  const select = document.getElementById('statusChangeSelect');
-  select.value = 'andamento';
+  renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
 
   closeContextMenu();
   openBackdrop('statusChangeBackdrop');
-  setTimeout(() => select.focus(), 120);
+  setTimeout(() => document.getElementById('statusChangeSelect').focus(), 120);
 }
 
 function closeStatusChangeModal() {
   closeBackdrop('statusChangeBackdrop');
-  document.getElementById('statusChangeSelect').value = 'andamento';
+  renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
 }
 
 async function saveStatusChange() {
@@ -456,18 +634,13 @@ async function saveStatusChange() {
 
   const status = document.getElementById('statusChangeSelect').value;
 
-  if (!['andamento', 'suporte', 'concluido'].includes(status)) {
+  if (!isValidStatus(status) || status === 'pendente') {
     notify('Status inválido.');
     return;
   }
 
-  const messageMap = {
-    andamento: 'Status alterado para em andamento.',
-    suporte: 'Status alterado para aguardando suporte.',
-    concluido: 'Status alterado para concluído.'
-  };
-
-  const ok = await updateTicket(ticket.id, { status }, messageMap[status]);
+  const info = getStatusInfo(status);
+  const ok = await updateTicket(ticket.id, { status }, `Status alterado para ${info.nome}.`);
   if (ok) closeStatusChangeModal();
 }
 
@@ -673,11 +846,12 @@ async function logout() {
 }
 
 function runTests() {
-  console.assert(getStatusInfo('suporte').text === 'Aguardando suporte', 'Teste status suporte falhou');
-  console.assert(getStatusInfo('pendente').text === 'Pendente - Conferir descrição', 'Teste status pendente falhou');
+  console.assert(getStatusInfo('suporte').nome === 'Aguardando suporte', 'Teste status suporte falhou');
+  console.assert(getStatusInfo('pendente').nome === 'Pendente - Conferir descrição', 'Teste status pendente falhou');
   console.assert(escapeHtml('<x>') === '&lt;x&gt;', 'Teste escapeHtml falhou');
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
+  console.assert(getStatusStyle('concluido').includes('#39d98a'), 'Teste cor status falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
   console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
   console.assert(brDateToInputDate('09/05/2026') === '2026-05-09', 'Teste data BR falhou');
@@ -686,6 +860,8 @@ function runTests() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await requireSession();
+
+  await loadStatuses();
 
   tickets = loadCachedTickets();
   render();
@@ -730,6 +906,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  document.getElementById('statusManagerBtn').addEventListener('click', openStatusManager);
+  document.getElementById('cancelStatusManagerBtn').addEventListener('click', closeStatusManager);
+  document.getElementById('listStatusesBtn').addEventListener('click', openStatusList);
+  document.getElementById('manageStatusesBtn').addEventListener('click', openStatusManage);
+  document.getElementById('closeStatusListBtn').addEventListener('click', closeStatusList);
+  document.getElementById('closeStatusManageBtn').addEventListener('click', closeStatusManage);
+  document.getElementById('saveNewStatusBtn').addEventListener('click', addCustomStatus);
+  document.getElementById('cancelStatusDeleteBtn').addEventListener('click', closeStatusDeleteConfirm);
+  document.getElementById('confirmStatusDeleteBtn').addEventListener('click', confirmRemoveStatus);
+  document.getElementById('newStatusColor').addEventListener('input', (event) => {
+    document.getElementById('newStatusColorText').textContent = event.target.value;
+  });
+  document.getElementById('statusRemoveList').addEventListener('click', (event) => {
+    const btn = event.target.closest('.status-remove-btn');
+    if (!btn) return;
+    askRemoveStatus(btn.dataset.statusCode);
+  });
+
   document.getElementById('addTicketBtn').addEventListener('click', openModal);
   document.getElementById('cancelAddBtn').addEventListener('click', closeModal);
   document.getElementById('saveAddBtn').addEventListener('click', addTicket);
@@ -768,6 +962,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('detailBackdrop').addEventListener('click', closeDetail);
   document.getElementById('detailModal').addEventListener('click', (event) => event.stopPropagation());
 
+  addBackdropClose('statusManagerBackdrop', closeStatusManager);
+  addBackdropClose('statusListBackdrop', closeStatusList);
+  addBackdropClose('statusManageBackdrop', closeStatusManage);
+  addBackdropClose('statusDeleteConfirmBackdrop', closeStatusDeleteConfirm);
   addBackdropClose('modalBackdrop', closeModal);
   addBackdropClose('editTitleBackdrop', closeEditTitleModal);
   addBackdropClose('editRequesterBackdrop', closeEditRequesterModal);
@@ -792,6 +990,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeEditDateModal();
       closeDeleteConfirm();
       closeStatusChangeModal();
+      closeStatusManager();
+      closeStatusList();
+      closeStatusManage();
+      closeStatusDeleteConfirm();
       searchOpen = false;
       const searchInput = document.getElementById('searchInput');
       if (searchInput) searchInput.value = '';
