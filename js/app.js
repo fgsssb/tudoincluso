@@ -21,6 +21,7 @@ let toastTimer = null;
 let realtimeClient = null;
 let realtimeChannel = null;
 let currentUser = null;
+let searchOpen = false;
 
 function getStatusInfo(status) {
   return statusMap[status] || statusMap.concluido;
@@ -29,6 +30,61 @@ function getStatusInfo(status) {
 function isValidStatus(status) {
   return ALLOWED_STATUSES.includes(status);
 }
+
+function normalizeSearchValue(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function getFilteredTickets() {
+  const filter = document.getElementById('searchFilter')?.value || 'titulo';
+  const term = normalizeSearchValue(document.getElementById('searchInput')?.value || '');
+
+  if (!term) return tickets;
+
+  return tickets.filter((ticket) => {
+    const normalized = normalizeTicket(ticket);
+    const statusText = getStatusInfo(normalized.status).text;
+
+    const searchMap = {
+      titulo: normalized.titulo,
+      solicitante: normalized.solicitante,
+      status: statusText
+    };
+
+    return normalizeSearchValue(searchMap[filter] || '').includes(term);
+  });
+}
+
+function syncSearchUi() {
+  const actions = document.querySelector('.search-actions');
+  const box = document.getElementById('searchBox');
+  const input = document.getElementById('searchInput');
+
+  if (!actions || !box || !input) return;
+
+  actions.classList.toggle('is-open', searchOpen);
+  box.classList.toggle('has-value', Boolean(input.value.trim()));
+}
+
+function toggleSearch() {
+  searchOpen = !searchOpen;
+  syncSearchUi();
+
+  if (searchOpen) {
+    setTimeout(() => document.getElementById('searchInput').focus(), 120);
+    return;
+  }
+
+  const input = document.getElementById('searchInput');
+  input.value = '';
+  render();
+  syncSearchUi();
+}
+
 
 function sanitizeText(value, maxLength) {
   return String(value || '')
@@ -150,8 +206,10 @@ function buildCardHtml(item, index) {
 
 function render() {
   const container = document.getElementById('doneCards');
-  container.innerHTML = tickets.length
-    ? tickets.map(buildCardHtml).join('')
+  const visibleTickets = getFilteredTickets();
+
+  container.innerHTML = visibleTickets.length
+    ? visibleTickets.map(buildCardHtml).join('')
     : '<div class="empty">Nenhum chamado encontrado.</div>';
 }
 
@@ -579,6 +637,7 @@ function runTests() {
   console.assert(escapeHtml('<x>') === '&lt;x&gt;', 'Teste escapeHtml falhou');
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
+  console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -598,6 +657,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('logoutBtn').addEventListener('click', (event) => {
     event.stopPropagation();
     logout();
+  });
+
+  document.getElementById('searchBtn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleSearch();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', () => {
+    searchOpen = true;
+    syncSearchUi();
+    render();
+  });
+
+  document.getElementById('searchFilter').addEventListener('change', () => {
+    searchOpen = true;
+    syncSearchUi();
+    render();
+    document.getElementById('searchInput').focus();
+  });
+
+  document.getElementById('searchInput').addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      document.getElementById('searchInput').value = '';
+      searchOpen = false;
+      syncSearchUi();
+      render();
+    }
   });
 
   document.getElementById('addTicketBtn').addEventListener('click', openModal);
@@ -657,6 +743,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeEditDescriptionModal();
       closeDeleteConfirm();
       closeStatusChangeModal();
+      searchOpen = false;
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = '';
+      syncSearchUi();
     }
   });
 
