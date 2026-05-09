@@ -35,6 +35,7 @@
           <input id="searchInput" type="search" placeholder="Pesquisar..." maxlength="80" autocomplete="off" spellcheck="false" aria-label="Campo de pesquisa">
         </div>
         <button class="search-btn" id="searchBtn" type="button" title="Pesquisar chamados" aria-label="Pesquisar chamados"></button>
+        <button class="admin-panel-btn is-hidden" id="adminPanelBtn" type="button" title="Painel admin" aria-label="Abrir painel admin"></button>
         <button class="status-manager-btn" id="statusManagerBtn" type="button" title="Gerenciar status" aria-label="Gerenciar status"></button>
         <button class="add-btn" id="addTicketBtn" type="button" title="Adicionar chamado" aria-label="Adicionar chamado"></button>
       </div>
@@ -167,6 +168,16 @@
       <div class="modal-actions">
         <button class="secondary" id="cancelStatusDeleteBtn" type="button">Cancelar</button>
         <button class="danger-btn" id="confirmStatusDeleteBtn" type="button">Remover</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminPanelBackdrop" class="modal-backdrop">
+    <div class="modal admin-panel-modal">
+      <h2>Painel admin</h2>
+      <p class="confirm-text">Área reservada para funções administrativas futuras.</p>
+      <div class="modal-actions">
+        <button class="secondary" id="closeAdminPanelBtn" type="button">Fechar</button>
       </div>
     </div>
   </div>
