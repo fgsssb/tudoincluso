@@ -8,6 +8,7 @@
   --green: #39d98a;
   --yellow: #f5c542;
   --red: #ff6b6b;
+  --blue: #6ea8ff;
 }
 
 * {
@@ -427,6 +428,10 @@ button {
 
 .status.progress {
   color: var(--yellow);
+}
+
+.status.pending {
+  color: var(--blue);
 }
 
 .status.support {
