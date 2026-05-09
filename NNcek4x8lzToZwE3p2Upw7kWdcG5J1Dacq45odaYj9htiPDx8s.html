@@ -18,7 +18,10 @@
           <span class="user-name" id="userName">Jean</span>
         </span>
       </div>
-      <button class="add-btn" id="addTicketBtn" type="button" title="Adicionar chamado" aria-label="Adicionar chamado"></button>
+      <div class="topbar-actions">
+        <button class="csv-tools-btn" id="csvToolsBtn" type="button" title="Importar/Exportar CSV" aria-label="Importar ou exportar CSV"></button>
+        <button class="add-btn" id="addTicketBtn" type="button" title="Adicionar chamado" aria-label="Adicionar chamado"></button>
+      </div>
     </section>
     <section class="panel">
       <div id="doneCards" class="cards"></div>
@@ -61,6 +64,46 @@
   <div id="editRequesterBackdrop" class="modal-backdrop"><div class="modal"><h2>Editar solicitante</h2><div class="form-grid"><input id="editRequesterInput" type="text" placeholder="Novo solicitante" maxlength="60" autocomplete="off" spellcheck="false"></div><div class="modal-actions"><button class="secondary" id="cancelEditRequesterBtn" type="button">Cancelar</button><button id="saveEditRequesterBtn" type="button">Salvar</button></div></div></div>
   <div id="editDescriptionBackdrop" class="modal-backdrop"><div class="modal"><h2>Editar descrição</h2><div class="form-grid"><textarea id="editDescriptionInput" placeholder="Nova descrição" maxlength="800" autocomplete="off" spellcheck="false"></textarea></div><div class="modal-actions"><button class="secondary" id="cancelEditDescriptionBtn" type="button">Cancelar</button><button id="saveEditDescriptionBtn" type="button">Salvar</button></div></div></div>
   <div id="deleteConfirmBackdrop" class="modal-backdrop"><div class="modal"><h2>Excluir chamado</h2><p class="confirm-text">Tem certeza que deseja excluir esse chamado?</p><div class="modal-actions"><button class="secondary" id="cancelDeleteBtn" type="button">Cancelar</button><button class="danger-btn" id="confirmDeleteBtn" type="button">Excluir</button></div></div></div>
+  <div id="csvToolsBackdrop" class="modal-backdrop">
+    <div class="modal csv-modal">
+      <h2>Dados CSV</h2>
+      <div class="csv-options">
+        <button class="csv-option-card" id="importCsvBtn" type="button">
+          <span class="csv-option-icon import"></span>
+          <span class="csv-option-info">
+            <strong>Importar CSV</strong>
+            <small>Carregar chamados salvos em outro computador.</small>
+          </span>
+        </button>
+
+        <button class="csv-option-card" id="exportCsvBtn" type="button">
+          <span class="csv-option-icon export"></span>
+          <span class="csv-option-info">
+            <strong>Exportar CSV</strong>
+            <small>Baixar todos os chamados em uma planilha CSV.</small>
+          </span>
+        </button>
+      </div>
+
+      <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
+
+      <div class="modal-actions">
+        <button class="secondary" id="cancelCsvToolsBtn" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="csvImportConfirmBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Importar CSV</h2>
+      <p class="confirm-text" id="csvImportConfirmText">Deseja importar os dados desse CSV?</p>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelCsvImportBtn" type="button">Cancelar</button>
+        <button id="confirmCsvImportBtn" type="button">Importar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
