@@ -13,17 +13,7 @@ const statusMap = Object.freeze({
   suporte: { text: 'Aguardando suporte', className: 'support' }
 });
 
-const seedTickets = [
-  { id: crypto.randomUUID(), titulo: 'Microfone do CallCenter', descricao: 'Corrigido problema com microfone no computador do CallCenter conforme solicitado por Larissa.', solicitante: 'Larissa', data: '08/05/2026', status: 'concluido' },
-  { id: crypto.randomUUID(), titulo: 'Telefone do Ambulatório', descricao: 'Reiniciado telefone do Ambulatório para correção de chamadas que não estavam sendo completadas conforme solicitado por Raquel.', solicitante: 'Raquel', data: '08/05/2026', status: 'concluido' },
-  { id: crypto.randomUUID(), titulo: 'Códigos CIR0409 e CIR0404', descricao: 'Criados os códigos CIR0409 e CIR0404, parametrizados conforme solicitado por Bruna, da Administração.', solicitante: 'Bruna', data: '08/05/2026', status: 'concluido' },
-  { id: crypto.randomUUID(), titulo: 'CIR0135 na sala 2', descricao: 'Incluído CIR0135 à sala 2 conforme solicitado por Daniele.', solicitante: 'Daniele', data: '08/05/2026', status: 'concluido' },
-  { id: crypto.randomUUID(), titulo: 'Driver da impressora - Silvania', descricao: 'Instalado driver da impressora no notebook da Silvania conforme solicitado.', solicitante: 'Silvania', data: '08/05/2026', status: 'concluido' },
-  { id: crypto.randomUUID(), titulo: 'Impressora do consultório 7', descricao: 'Corrigido problema com impressora que não funcionava a impressão no consultório 7 conforme solicitado por Jéssica.', solicitante: 'Jéssica', data: '08/05/2026', status: 'concluido' },
-  { id: crypto.randomUUID(), titulo: 'Notebook do Centro Diagnóstico Laser', descricao: 'Verificado erro no notebook dos equipamentos no Centro Diagnóstico Laser, já está operando normalmente.', solicitante: 'Não informado', data: '08/05/2026', status: 'concluido' },
-  { id: crypto.randomUUID(), titulo: 'Códigos PCT0174 e PCT0173', descricao: 'Inseridos códigos PCT0174 e PCT0173 na sala 2 conforme solicitado por Daniele.', solicitante: 'Daniele', data: '08/05/2026', status: 'concluido' },
-  { id: crypto.randomUUID(), titulo: 'Procedimento SALA DE REUNIÕES', descricao: 'Corrigido problema com procedimento “SALA DE REUNIÕES”, que não aparecia ao tentar realizar agendamento para o dia 11, conforme solicitado por Bruna da Administração.', solicitante: 'Bruna', data: '08/05/2026', status: 'concluido' }
-];
+const seedTickets = [];
 
 let tickets = [];
 let selectedTicketId = null;
