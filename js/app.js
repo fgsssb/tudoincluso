@@ -163,10 +163,28 @@ function normalizeTicket(raw) {
   };
 }
 
+function getStatusPriority(status) {
+  const priorityMap = {
+    pendente: 0,
+    suporte: 1,
+    andamento: 2,
+    concluido: 9
+  };
+
+  return Object.prototype.hasOwnProperty.call(priorityMap, status)
+    ? priorityMap[status]
+    : 3;
+}
+
 function sortTickets() {
   tickets.sort((a, b) => {
+    const statusDiff = getStatusPriority(a.status) - getStatusPriority(b.status);
+
+    if (statusDiff !== 0) return statusDiff;
+
     const aTime = Date.parse(a.criado_em || '') || 0;
     const bTime = Date.parse(b.criado_em || '') || 0;
+
     return bTime - aTime;
   });
 }
@@ -868,6 +886,9 @@ function runTests() {
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
   console.assert(normalizeTicket({ destacado: true }).destacado === true, 'Teste destacado falhou');
+  console.assert(getStatusPriority('pendente') < getStatusPriority('concluido'), 'Teste prioridade pendente falhou');
+  console.assert(getStatusPriority('suporte') < getStatusPriority('concluido'), 'Teste prioridade suporte falhou');
+  console.assert(getStatusPriority('andamento') < getStatusPriority('concluido'), 'Teste prioridade andamento falhou');
   console.assert(getStatusStyle('concluido').includes('#39d98a'), 'Teste cor status falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
   console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
@@ -881,6 +902,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadStatuses();
 
   tickets = loadCachedTickets();
+  sortTickets();
   render();
 
   await loadTicketsFromServer();
