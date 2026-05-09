@@ -809,6 +809,164 @@ function addBackdropClose(id, closeFn) {
   });
 }
 
+function openTicketExport() {
+  if (!isAdminUser()) {
+    notify('Acesso restrito ao administrador.');
+    return;
+  }
+
+  renderExportStatusOptions();
+  closeAdminPanel();
+  openBackdrop('ticketExportBackdrop');
+}
+
+function closeTicketExport() {
+  closeBackdrop('ticketExportBackdrop');
+  document.getElementById('exportStartDate').value = '';
+  document.getElementById('exportEndDate').value = '';
+  document.getElementById('exportStatusFilter').value = '';
+  document.getElementById('exportRequesterFilter').value = '';
+}
+
+function renderExportStatusOptions() {
+  const select = document.getElementById('exportStatusFilter');
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Todos os status</option>' + statuses
+    .map((item) => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`)
+    .join('');
+}
+
+function csvEscape(value) {
+  const text = String(value ?? '');
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+
+function getTicketDateComparable(ticket) {
+  const inputDate = brDateToInputDate(ticket.data);
+  return inputDate || '';
+}
+
+function getTicketsForExport(useFilters) {
+  if (!useFilters) return [...tickets];
+
+  const start = document.getElementById('exportStartDate').value;
+  const end = document.getElementById('exportEndDate').value;
+  const status = document.getElementById('exportStatusFilter').value;
+  const requester = normalizeSearchValue(document.getElementById('exportRequesterFilter').value);
+
+  return tickets.filter((ticket) => {
+    const normalized = normalizeTicket(ticket);
+    const ticketDate = getTicketDateComparable(normalized);
+
+    if (start && ticketDate && ticketDate < start) return false;
+    if (end && ticketDate && ticketDate > end) return false;
+    if ((start || end) && !ticketDate) return false;
+    if (status && normalized.status !== status) return false;
+    if (requester && !normalizeSearchValue(normalized.solicitante).includes(requester)) return false;
+
+    return true;
+  });
+}
+
+function ticketsToCsv(rows) {
+  const headers = [
+    'id',
+    'titulo',
+    'descricao',
+    'solicitante',
+    'status_codigo',
+    'status_nome',
+    'data',
+    'concluido_por',
+    'destacado',
+    'criado_em',
+    'atualizado_em'
+  ];
+
+  const csvRows = rows.map((ticket) => {
+    const normalized = normalizeTicket(ticket);
+    const statusInfo = getStatusInfo(normalized.status);
+
+    const values = {
+      id: normalized.id,
+      titulo: normalized.titulo,
+      descricao: normalized.descricao,
+      solicitante: normalized.solicitante,
+      status_codigo: normalized.status,
+      status_nome: statusInfo.nome,
+      data: normalized.data,
+      concluido_por: normalized.concluido_por_nome || '',
+      destacado: normalized.destacado ? 'sim' : 'não',
+      criado_em: normalized.criado_em || '',
+      atualizado_em: normalized.atualizado_em || ''
+    };
+
+    return headers.map((key) => csvEscape(values[key])).join(',');
+  });
+
+  return '\ufeff' + headers.map(csvEscape).join(',') + '\n' + csvRows.join('\n');
+}
+
+function getExportFileName(useFilters) {
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, '0');
+  const stamp = [now.getFullYear(), pad(now.getMonth() + 1), pad(now.getDate())].join('-');
+  return useFilters ? `chamados-filtrados-${stamp}.csv` : `chamados-todos-${stamp}.csv`;
+}
+
+async function downloadCsv(rows, useFilters) {
+  if (!rows.length) {
+    notify('Nenhum chamado encontrado para exportar.');
+    return;
+  }
+
+  const blob = new Blob([ticketsToCsv(rows)], { type: 'text/csv;charset=utf-8' });
+  const fileName = getExportFileName(useFilters);
+
+  try {
+    if ('showSaveFilePicker' in window) {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [
+          {
+            description: 'Arquivo CSV',
+            accept: { 'text/csv': ['.csv'] }
+          }
+        ]
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    } else {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    notify('CSV exportado.');
+  } catch (error) {
+    if (error && error.name === 'AbortError') return;
+    notify('Não foi possível exportar o CSV.');
+  }
+}
+
+async function exportTickets(useFilters) {
+  if (!isAdminUser()) {
+    notify('Acesso restrito ao administrador.');
+    return;
+  }
+
+  await loadTicketsFromServer();
+  await downloadCsv(getTicketsForExport(useFilters), useFilters);
+}
+
 let adminUsers = [];
 let pendingUserDeleteId = null;
 
@@ -1143,6 +1301,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('closeAdminPanelBtn').addEventListener('click', closeAdminPanel);
   document.getElementById('manageUsersBtn').addEventListener('click', openUserManage);
+  document.getElementById('manageTicketsBtn').addEventListener('click', openTicketExport);
+  document.getElementById('closeTicketExportBtn').addEventListener('click', closeTicketExport);
+  document.getElementById('exportAllTicketsBtn').addEventListener('click', () => exportTickets(false));
+  document.getElementById('exportFilteredTicketsBtn').addEventListener('click', () => exportTickets(true));
   document.getElementById('closeUserManageBtn').addEventListener('click', closeUserManage);
   document.getElementById('saveNewUserBtn').addEventListener('click', createAdminUser);
   document.getElementById('cancelUserDeleteBtn').addEventListener('click', closeUserDeleteConfirm);
@@ -1248,6 +1410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   addBackdropClose('statusManageBackdrop', closeStatusManage);
   addBackdropClose('statusDeleteConfirmBackdrop', closeStatusDeleteConfirm);
   addBackdropClose('adminPanelBackdrop', closeAdminPanel);
+  addBackdropClose('ticketExportBackdrop', closeTicketExport);
   addBackdropClose('userManageBackdrop', closeUserManage);
   addBackdropClose('userDeleteConfirmBackdrop', closeUserDeleteConfirm);
   addBackdropClose('modalBackdrop', closeModal);
@@ -1281,6 +1444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeStatusManage();
       closeStatusDeleteConfirm();
       closeAdminPanel();
+      closeTicketExport();
       closeUserManage();
       closeUserDeleteConfirm();
       searchOpen = false;
