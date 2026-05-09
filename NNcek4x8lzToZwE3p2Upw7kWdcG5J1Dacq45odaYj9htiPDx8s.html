@@ -55,7 +55,7 @@
     <button class="context-item edit" id="editTitleMenuBtn" type="button">Editar título</button>
     <button class="context-item edit" id="editRequesterMenuBtn" type="button">Editar solicitante</button>
     <button class="context-item edit" id="editDescriptionMenuBtn" type="button">Editar descrição</button>
-    <button class="context-item support-action" id="moveSupportBtn" type="button">Mudar status para suporte</button>
+    <button class="context-item status-action" id="changeStatusBtn" type="button">Mudar status</button>
   </div>
 
   <div id="editTitleBackdrop" class="modal-backdrop"><div class="modal"><h2>Editar título</h2><div class="form-grid"><input id="editTitleInput" type="text" placeholder="Novo título" maxlength="90" autocomplete="off" spellcheck="false"></div><div class="modal-actions"><button class="secondary" id="cancelEditTitleBtn" type="button">Cancelar</button><button id="saveEditTitleBtn" type="button">Salvar</button></div></div></div>
@@ -64,6 +64,22 @@
   <div id="deleteConfirmBackdrop" class="modal-backdrop"><div class="modal"><h2>Excluir chamado</h2><p class="confirm-text">Tem certeza que deseja excluir esse chamado?</p><div class="modal-actions"><button class="secondary" id="cancelDeleteBtn" type="button">Cancelar</button><button class="danger-btn" id="confirmDeleteBtn" type="button">Excluir</button></div></div></div>
   </div>
 
+  <div id="statusChangeBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Mudar status</h2>
+      <div class="form-grid">
+        <select id="statusChangeSelect">
+          <option value="andamento">Em andamento</option>
+          <option value="suporte">Aguardando suporte</option>
+          <option value="concluido">Concluído</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelStatusChangeBtn" type="button">Cancelar</button>
+        <button id="saveStatusChangeBtn" type="button">Salvar</button>
+      </div>
+    </div>
+  </div>
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
