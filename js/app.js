@@ -31,6 +31,18 @@ function isValidStatus(status) {
   return ALLOWED_STATUSES.includes(status);
 }
 
+function brDateToInputDate(value) {
+  const match = String(value || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return '';
+  return `${match[3]}-${match[2]}-${match[1]}`;
+}
+
+function inputDateToBrDate(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return '';
+  return `${match[3]}/${match[2]}/${match[1]}`;
+}
+
 function normalizeSearchValue(value) {
   return String(value || '')
     .normalize('NFD')
@@ -540,6 +552,34 @@ async function saveEditedDescription() {
   if (ok) closeEditDescriptionModal();
 }
 
+
+function openEditDateModal() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const input = document.getElementById('editDateInput');
+  input.value = brDateToInputDate(ticket.data) || new Date().toISOString().slice(0, 10);
+  closeContextMenu();
+  openBackdrop('editDateBackdrop');
+  setTimeout(() => { input.focus(); input.showPicker?.(); }, 120);
+}
+
+function closeEditDateModal() {
+  closeBackdrop('editDateBackdrop');
+  document.getElementById('editDateInput').value = '';
+}
+
+async function saveEditedDate() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const value = inputDateToBrDate(document.getElementById('editDateInput').value);
+  if (!value) return notify('Informe uma data válida.');
+
+  const ok = await updateTicket(ticket.id, { data: value }, 'Data atualizada.');
+  if (ok) closeEditDateModal();
+}
+
 function addBackdropClose(id, closeFn) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -639,6 +679,8 @@ function runTests() {
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
+  console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
+  console.assert(brDateToInputDate('09/05/2026') === '2026-05-09', 'Teste data BR falhou');
   console.assert(normalizeSearchValue('09/05/2026').includes('09'), 'Teste busca por data falhou');
 }
 
@@ -696,6 +738,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('editTitleMenuBtn').addEventListener('click', openEditTitleModal);
   document.getElementById('editRequesterMenuBtn').addEventListener('click', openEditRequesterModal);
   document.getElementById('editDescriptionMenuBtn').addEventListener('click', openEditDescriptionModal);
+  document.getElementById('editDateMenuBtn').addEventListener('click', openEditDateModal);
   document.getElementById('changeStatusBtn').addEventListener('click', openStatusChangeModal);
 
   document.getElementById('cancelEditTitleBtn').addEventListener('click', closeEditTitleModal);
@@ -704,6 +747,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('saveEditRequesterBtn').addEventListener('click', saveEditedRequester);
   document.getElementById('cancelEditDescriptionBtn').addEventListener('click', closeEditDescriptionModal);
   document.getElementById('saveEditDescriptionBtn').addEventListener('click', saveEditedDescription);
+  document.getElementById('cancelEditDateBtn').addEventListener('click', closeEditDateModal);
+  document.getElementById('saveEditDateBtn').addEventListener('click', saveEditedDate);
 
   document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteConfirm);
   document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteTicket);
@@ -727,6 +772,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   addBackdropClose('editTitleBackdrop', closeEditTitleModal);
   addBackdropClose('editRequesterBackdrop', closeEditRequesterModal);
   addBackdropClose('editDescriptionBackdrop', closeEditDescriptionModal);
+  addBackdropClose('editDateBackdrop', closeEditDateModal);
   addBackdropClose('deleteConfirmBackdrop', closeDeleteConfirm);
   addBackdropClose('statusChangeBackdrop', closeStatusChangeModal);
 
@@ -743,6 +789,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeEditTitleModal();
       closeEditRequesterModal();
       closeEditDescriptionModal();
+      closeEditDateModal();
       closeDeleteConfirm();
       closeStatusChangeModal();
       searchOpen = false;
@@ -765,6 +812,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('editDescriptionInput').addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeEditDescriptionModal();
     if (event.key === 'Enter' && event.ctrlKey) saveEditedDescription();
+  });
+
+  document.getElementById('editDateInput').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveEditedDate();
+    if (event.key === 'Escape') closeEditDateModal();
   });
 
   document.getElementById('statusChangeSelect').addEventListener('keydown', (event) => {
