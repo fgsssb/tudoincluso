@@ -36,6 +36,7 @@
           <input id="searchInput" type="search" placeholder="Pesquisar..." maxlength="80" autocomplete="off" spellcheck="false" aria-label="Campo de pesquisa">
         </div>
         <button class="search-btn" id="searchBtn" type="button" title="Pesquisar chamados" aria-label="Pesquisar chamados"></button>
+        <button class="status-manager-btn" id="statusManagerBtn" type="button" title="Gerenciar status" aria-label="Gerenciar status"></button>
         <button class="add-btn" id="addTicketBtn" type="button" title="Adicionar chamado" aria-label="Adicionar chamado"></button>
       </div>
     </section>
@@ -101,6 +102,75 @@
       </div>
     </div>
   </div>
+
+  <div id="statusManagerBackdrop" class="modal-backdrop">
+    <div class="modal status-manager-modal">
+      <h2>Status</h2>
+      <div class="status-manager-options">
+        <button class="status-manager-card" id="listStatusesBtn" type="button">
+          <span class="status-manager-icon list"></span>
+          <span class="status-manager-info">
+            <strong>Listar status</strong>
+            <small>Ver todos os status disponíveis no sistema.</small>
+          </span>
+        </button>
+        <button class="status-manager-card" id="manageStatusesBtn" type="button">
+          <span class="status-manager-icon manage"></span>
+          <span class="status-manager-info">
+            <strong>Adicionar/remover status</strong>
+            <small>Criar status com cor própria ou remover status customizados.</small>
+          </span>
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelStatusManagerBtn" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusListBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Listar status</h2>
+      <div class="status-list" id="statusList"></div>
+      <div class="modal-actions">
+        <button class="secondary" id="closeStatusListBtn" type="button">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusManageBackdrop" class="modal-backdrop">
+    <div class="modal status-manage-modal">
+      <h2>Adicionar/remover status</h2>
+      <div class="form-grid">
+        <input id="newStatusName" type="text" placeholder="Nome do status" maxlength="50" autocomplete="off" spellcheck="false">
+        <div class="status-color-row">
+          <label for="newStatusColor">Cor</label>
+          <input id="newStatusColor" type="color" value="#8c96a8">
+          <span id="newStatusColorText">#8c96a8</span>
+        </div>
+        <button id="saveNewStatusBtn" type="button">Adicionar status</button>
+      </div>
+      <div class="status-remove-area">
+        <span class="status-remove-title">Status existentes</span>
+        <div class="status-remove-list" id="statusRemoveList"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="closeStatusManageBtn" type="button">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusDeleteConfirmBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Remover status</h2>
+      <p class="confirm-text" id="statusDeleteConfirmText">Tem certeza que deseja remover esse status?</p>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelStatusDeleteBtn" type="button">Cancelar</button>
+        <button class="danger-btn" id="confirmStatusDeleteBtn" type="button">Remover</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
