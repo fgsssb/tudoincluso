@@ -773,7 +773,6 @@ async function requireSession() {
   const data = await res.json();
   currentUser = data.user;
   document.getElementById('userName').textContent = currentUser.nome || currentUser.login || 'TI';
-  document.getElementById('userAvatar').firstChild.nodeValue = (currentUser.nome || currentUser.login || 'T').trim().charAt(0).toUpperCase();
 
   return currentUser;
 }
