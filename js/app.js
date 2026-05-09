@@ -542,6 +542,37 @@ async function setupRealtime() {
     .subscribe();
 }
 
+function toggleUserMenu() {
+  const menu = document.getElementById('userMenu');
+  const userButton = document.getElementById('loggedUser');
+  const isOpen = menu.classList.toggle('is-open');
+  userButton.setAttribute('aria-expanded', String(isOpen));
+}
+
+function closeUserMenu() {
+  const menu = document.getElementById('userMenu');
+  const userButton = document.getElementById('loggedUser');
+
+  if (!menu) return;
+
+  menu.classList.remove('is-open');
+
+  if (userButton) {
+    userButton.setAttribute('aria-expanded', 'false');
+  }
+}
+
+async function logout() {
+  try {
+    await fetch('/api/logout', {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+  } catch {}
+
+  window.location.href = LOGIN_URL;
+}
+
 function runTests() {
   console.assert(getStatusInfo('suporte').text === 'Aguardando suporte', 'Teste status suporte falhou');
   console.assert(getStatusInfo('pendente').text === 'Pendente - Conferir descrição', 'Teste status pendente falhou');
@@ -558,6 +589,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await loadTicketsFromServer();
   setupRealtime();
+
+  document.getElementById('loggedUser').addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleUserMenu();
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    logout();
+  });
 
   document.getElementById('addTicketBtn').addEventListener('click', openModal);
   document.getElementById('cancelAddBtn').addEventListener('click', closeModal);
@@ -601,10 +642,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   addBackdropClose('deleteConfirmBackdrop', closeDeleteConfirm);
   addBackdropClose('statusChangeBackdrop', closeStatusChangeModal);
 
-  document.addEventListener('click', closeContextMenu);
+  document.addEventListener('click', () => {
+    closeContextMenu();
+    closeUserMenu();
+  });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       closeContextMenu();
+      closeUserMenu();
       closeDetail();
       closeModal();
       closeEditTitleModal();
