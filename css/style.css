@@ -1603,3 +1603,14 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+.status-line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.status-normal {
+  color: var(--muted);
+  font-weight: 700;
+}
