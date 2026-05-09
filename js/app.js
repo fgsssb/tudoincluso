@@ -809,6 +809,31 @@ function addBackdropClose(id, closeFn) {
   });
 }
 
+function isAdminUser() {
+  const role = String(currentUser?.role || '').toLowerCase();
+  return role === 'admin';
+}
+
+function syncAdminUi() {
+  const btn = document.getElementById('adminPanelBtn');
+  if (!btn) return;
+
+  btn.classList.toggle('is-hidden', !isAdminUser());
+}
+
+function openAdminPanel() {
+  if (!isAdminUser()) {
+    notify('Acesso restrito ao administrador.');
+    return;
+  }
+
+  openBackdrop('adminPanelBackdrop');
+}
+
+function closeAdminPanel() {
+  closeBackdrop('adminPanelBackdrop');
+}
+
 async function requireSession() {
   const res = await fetch('/api/session', { credentials: 'same-origin' });
 
@@ -820,6 +845,7 @@ async function requireSession() {
   const data = await res.json();
   currentUser = data.user;
   document.getElementById('userName').textContent = currentUser.nome || currentUser.login || 'TI';
+  syncAdminUi();
 
   return currentUser;
 }
@@ -949,6 +975,9 @@ function runTests() {
   console.assert(getStatusPriority('andamento') < getStatusPriority('concluido'), 'Teste prioridade andamento falhou');
   console.assert(getStatusStyle('concluido').includes('#39d98a'), 'Teste cor status falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
+  currentUser = { role: 'Admin' };
+  console.assert(isAdminUser() === true, 'Teste admin role falhou');
+  currentUser = null;
   console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
   console.assert(brDateToInputDate('09/05/2026') === '2026-05-09', 'Teste data BR falhou');
   console.assert(isTypingTarget(document.createElement('input')) === true, 'Teste hotkey typing target falhou');
@@ -976,6 +1005,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     event.stopPropagation();
     logout();
   });
+
+  document.getElementById('adminPanelBtn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    openAdminPanel();
+  });
+
+  document.getElementById('closeAdminPanelBtn').addEventListener('click', closeAdminPanel);
 
   document.getElementById('searchBtn').addEventListener('click', (event) => {
     event.stopPropagation();
@@ -1065,6 +1101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   addBackdropClose('statusListBackdrop', closeStatusList);
   addBackdropClose('statusManageBackdrop', closeStatusManage);
   addBackdropClose('statusDeleteConfirmBackdrop', closeStatusDeleteConfirm);
+  addBackdropClose('adminPanelBackdrop', closeAdminPanel);
   addBackdropClose('modalBackdrop', closeModal);
   addBackdropClose('editTitleBackdrop', closeEditTitleModal);
   addBackdropClose('editRequesterBackdrop', closeEditRequesterModal);
@@ -1095,6 +1132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeStatusList();
       closeStatusManage();
       closeStatusDeleteConfirm();
+      closeAdminPanel();
       searchOpen = false;
       const searchInput = document.getElementById('searchInput');
       if (searchInput) searchInput.value = '';
