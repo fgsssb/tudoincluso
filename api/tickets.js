@@ -148,11 +148,7 @@ module.exports = async function handler(req, res) {
 
       const { error } = await supabase
         .from('pj1_tickets')
-        .update({
-          deletado: true,
-          atualizado_por: session.sub,
-          atualizado_em: new Date().toISOString()
-        })
+        .delete()
         .eq('id', id);
 
       if (error) throw error;
