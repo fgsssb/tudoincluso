@@ -988,25 +988,17 @@ textarea {
   content: '';
   position: relative;
   z-index: 1;
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   display: inline-flex;
-  border: 2px solid #c8cfdb;
-  border-radius: 50%;
-  transform: translate(-1px, -1px);
-  transition: transform .18s ease, border-color .18s ease;
+  background: #c8cfdb;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.8 4.5a6.3 6.3 0 1 1 0 12.6a6.3 6.3 0 0 1 0-12.6Zm0 2a4.3 4.3 0 1 0 0 8.6a4.3 4.3 0 0 0 0-8.6Zm5 9.1l4.1 4.1l-1.4 1.4l-4.1-4.1l1.4-1.4Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.8 4.5a6.3 6.3 0 1 1 0 12.6a6.3 6.3 0 0 1 0-12.6Zm0 2a4.3 4.3 0 1 0 0 8.6a4.3 4.3 0 0 0 0-8.6Zm5 9.1l4.1 4.1l-1.4 1.4l-4.1-4.1l1.4-1.4Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform .18s ease, background .18s ease;
 }
 
 .search-btn::after {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  width: 7px;
-  height: 2px;
-  background: #c8cfdb;
-  border-radius: 999px;
-  transform: translate(8px, 8px) rotate(45deg);
-  transition: transform .18s ease, background .18s ease;
+  display: none;
 }
 
 .search-btn:hover,
@@ -1018,13 +1010,8 @@ textarea {
 
 .search-btn:hover::before,
 .search-actions.is-open .search-btn::before {
-  border-color: var(--blue);
-  transform: translate(-1px, -1px) scale(1.04);
-}
-
-.search-btn:hover::after,
-.search-actions.is-open .search-btn::after {
   background: var(--blue);
+  transform: scale(1.06);
 }
 
 @media (max-width: 760px) {
