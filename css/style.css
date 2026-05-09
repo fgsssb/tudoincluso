@@ -322,9 +322,10 @@ button {
 .card-head {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   margin-bottom: 8px;
+  padding-right: 92px;
 }
 
 .card-title {
@@ -336,10 +337,13 @@ button {
 }
 
 .card-date {
+  position: absolute;
+  right: 14px;
+  top: 13px;
   color: var(--muted);
   font-size: 12px;
   white-space: nowrap;
-  padding-top: 1px;
+  padding-top: 0;
 }
 
 .card-open-hint {
