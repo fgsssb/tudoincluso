@@ -1,6 +1,6 @@
 const { getSupabaseAdmin, requireSession, json, safeText, readJson } = require('./_utils');
 
-const VALID_STATUSES = new Set(['concluido', 'andamento', 'suporte']);
+const VALID_STATUSES = new Set(['concluido', 'andamento', 'pendente', 'suporte']);
 
 function cleanTitle(value) {
   return safeText(value, 90);
