@@ -47,6 +47,8 @@ function serializeTicket(row) {
     atualizado_por: row.atualizado_por,
     criado_em: row.criado_em,
     atualizado_em: row.atualizado_em,
+    concluido_por: row.concluido_por,
+    concluido_por_nome: row.concluido_por_nome,
     destacado: Boolean(row.destacado)
   };
 }
@@ -61,7 +63,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('pj1_tickets')
-        .select('id,titulo,descricao,solicitante,status,data,destacado,criado_por,atualizado_por,criado_em,atualizado_em')
+        .select('id,titulo,descricao,solicitante,status,data,destacado,concluido_por,concluido_por_nome,criado_por,atualizado_por,criado_em,atualizado_em')
         .eq('deletado', false)
         .order('criado_em', { ascending: false });
 
@@ -91,10 +93,12 @@ module.exports = async function handler(req, res) {
           status,
           data: dataCampo,
           destacado: false,
+          concluido_por: status === 'concluido' ? session.sub : null,
+          concluido_por_nome: status === 'concluido' ? (session.nome || session.login || 'Não informado') : null,
           criado_por: session.sub,
           atualizado_por: session.sub
         })
-        .select('id,titulo,descricao,solicitante,status,data,destacado,criado_por,atualizado_por,criado_em,atualizado_em')
+        .select('id,titulo,descricao,solicitante,status,data,destacado,concluido_por,concluido_por_nome,criado_por,atualizado_por,criado_em,atualizado_em')
         .single();
 
       if (error) throw error;
@@ -133,6 +137,14 @@ module.exports = async function handler(req, res) {
         const checkedStatus = await cleanStatus(supabase, body.status);
         if (checkedStatus !== body.status) return json(res, 400, { error: 'Status inválido' });
         patch.status = body.status;
+
+        if (body.status === 'concluido') {
+          patch.concluido_por = session.sub;
+          patch.concluido_por_nome = session.nome || session.login || 'Não informado';
+        } else {
+          patch.concluido_por = null;
+          patch.concluido_por_nome = null;
+        }
       }
 
       if (Object.prototype.hasOwnProperty.call(body, 'data')) {
@@ -148,7 +160,7 @@ module.exports = async function handler(req, res) {
         .update(patch)
         .eq('id', id)
         .eq('deletado', false)
-        .select('id,titulo,descricao,solicitante,status,data,destacado,criado_por,atualizado_por,criado_em,atualizado_em')
+        .select('id,titulo,descricao,solicitante,status,data,destacado,concluido_por,concluido_por_nome,criado_por,atualizado_por,criado_em,atualizado_em')
         .single();
 
       if (error) throw error;
