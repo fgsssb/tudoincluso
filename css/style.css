@@ -1029,3 +1029,271 @@ textarea {
     width: 100%;
   }
 }
+
+
+.status-manager-btn {
+  position: relative;
+  overflow: hidden;
+  height: 40px;
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  background: linear-gradient(180deg, #1a1f29 0%, var(--surface-2) 100%);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .04);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.status-manager-btn::before {
+  content: '≡';
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(140, 150, 168, .10);
+  color: #c8cfdb;
+  border: 1px solid rgba(140, 150, 168, .18);
+  font-weight: 900;
+  font-size: 16px;
+  line-height: 1;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.status-manager-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(140, 150, 168, .10), rgba(140, 150, 168, .03));
+  opacity: 0;
+  transition: opacity .18s ease;
+  pointer-events: none;
+}
+
+.status-manager-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(140, 150, 168, .30);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .28), 0 0 0 3px rgba(140, 150, 168, .045), inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+.status-manager-btn:hover::before {
+  transform: scale(1.04);
+  background: rgba(140, 150, 168, .14);
+  border-color: rgba(140, 150, 168, .26);
+  color: var(--text);
+}
+
+.status-manager-btn:hover::after {
+  opacity: 1;
+}
+
+.status-manager-modal,
+.status-manage-modal {
+  width: min(580px, 100%);
+}
+
+.status-manager-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.status-manager-card {
+  min-width: 0;
+  height: auto;
+  min-height: 118px;
+  padding: 14px;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.status-manager-card:hover {
+  transform: translateY(-2px);
+  border-color: #394254;
+  background: #181d27;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
+}
+
+.status-manager-icon,
+.status-color-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-manager-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .035);
+  border: 1px solid rgba(255, 255, 255, .06);
+}
+
+.status-manager-icon.list::before {
+  content: '≡';
+  color: var(--blue);
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.status-manager-icon.manage::before {
+  content: '+';
+  color: var(--green);
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.status-manager-info {
+  display: grid;
+  gap: 5px;
+}
+
+.status-manager-info strong {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.status-manager-info small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.status-list,
+.status-remove-list {
+  display: grid;
+  gap: 8px;
+  max-height: 340px;
+  overflow: auto;
+}
+
+.status-list-item,
+.status-remove-item {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.status-list-left,
+.status-remove-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.status-color-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .035);
+}
+
+.status-list-name,
+.status-remove-name {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.status-lock {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  opacity: .75;
+}
+
+.status-color-row {
+  height: 40px;
+  display: grid;
+  grid-template-columns: auto 48px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-color-row label,
+.status-remove-title {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status-color-row input[type="color"] {
+  width: 48px;
+  height: 36px;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.status-color-row span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-remove-area {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.status-remove-title {
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.status-remove-btn {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 107, 107, .18);
+  background: rgba(255, 107, 107, .08);
+  color: var(--red);
+  font-weight: 900;
+}
+
+.status-remove-btn:hover {
+  background: rgba(255, 107, 107, .14);
+  border-color: rgba(255, 107, 107, .28);
+  color: #ffe8e8;
+}
+
+.status-remove-btn[disabled] {
+  opacity: .35;
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  .status-manager-options {
+    grid-template-columns: 1fr;
+  }
+}
