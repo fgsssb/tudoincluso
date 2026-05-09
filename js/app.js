@@ -305,7 +305,7 @@ function openContextMenu(event, id) {
   if (!ticket) return;
 
   selectedTicketId = id;
-  document.getElementById('moveSupportBtn').classList.toggle('is-hidden', ticket.status !== 'andamento');
+  document.getElementById('changeStatusBtn').classList.toggle('is-hidden', ticket.status !== 'pendente');
 
   const menu = document.getElementById('contextMenu');
   menu.style.left = event.clientX + 'px';
@@ -362,12 +362,42 @@ async function confirmDeleteTicket() {
   }
 }
 
-async function moveSelectedTicketToSupport() {
+function openStatusChangeModal() {
   const ticket = getSelectedTicket();
-  if (!ticket || ticket.status !== 'andamento') return;
+  if (!ticket || ticket.status !== 'pendente') return;
 
-  await updateTicket(ticket.id, { status: 'suporte' }, 'Status alterado para aguardando suporte.');
+  const select = document.getElementById('statusChangeSelect');
+  select.value = 'andamento';
+
   closeContextMenu();
+  openBackdrop('statusChangeBackdrop');
+  setTimeout(() => select.focus(), 120);
+}
+
+function closeStatusChangeModal() {
+  closeBackdrop('statusChangeBackdrop');
+  document.getElementById('statusChangeSelect').value = 'andamento';
+}
+
+async function saveStatusChange() {
+  const ticket = getSelectedTicket();
+  if (!ticket || ticket.status !== 'pendente') return;
+
+  const status = document.getElementById('statusChangeSelect').value;
+
+  if (!['andamento', 'suporte', 'concluido'].includes(status)) {
+    notify('Status inválido.');
+    return;
+  }
+
+  const messageMap = {
+    andamento: 'Status alterado para em andamento.',
+    suporte: 'Status alterado para aguardando suporte.',
+    concluido: 'Status alterado para concluído.'
+  };
+
+  const ok = await updateTicket(ticket.id, { status }, messageMap[status]);
+  if (ok) closeStatusChangeModal();
 }
 
 function openEditTitleModal() {
@@ -537,7 +567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('editTitleMenuBtn').addEventListener('click', openEditTitleModal);
   document.getElementById('editRequesterMenuBtn').addEventListener('click', openEditRequesterModal);
   document.getElementById('editDescriptionMenuBtn').addEventListener('click', openEditDescriptionModal);
-  document.getElementById('moveSupportBtn').addEventListener('click', moveSelectedTicketToSupport);
+  document.getElementById('changeStatusBtn').addEventListener('click', openStatusChangeModal);
 
   document.getElementById('cancelEditTitleBtn').addEventListener('click', closeEditTitleModal);
   document.getElementById('saveEditTitleBtn').addEventListener('click', saveEditedTitle);
@@ -548,6 +578,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteConfirm);
   document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteTicket);
+  document.getElementById('cancelStatusChangeBtn').addEventListener('click', closeStatusChangeModal);
+  document.getElementById('saveStatusChangeBtn').addEventListener('click', saveStatusChange);
 
   document.getElementById('doneCards').addEventListener('click', (event) => {
     const card = event.target.closest('.card');
@@ -567,6 +599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   addBackdropClose('editRequesterBackdrop', closeEditRequesterModal);
   addBackdropClose('editDescriptionBackdrop', closeEditDescriptionModal);
   addBackdropClose('deleteConfirmBackdrop', closeDeleteConfirm);
+  addBackdropClose('statusChangeBackdrop', closeStatusChangeModal);
 
   document.addEventListener('click', closeContextMenu);
   document.addEventListener('keydown', (event) => {
@@ -578,6 +611,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeEditRequesterModal();
       closeEditDescriptionModal();
       closeDeleteConfirm();
+      closeStatusChangeModal();
     }
   });
 
@@ -594,6 +628,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('editDescriptionInput').addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeEditDescriptionModal();
     if (event.key === 'Enter' && event.ctrlKey) saveEditedDescription();
+  });
+
+  document.getElementById('statusChangeSelect').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveStatusChange();
+    if (event.key === 'Escape') closeStatusChangeModal();
   });
 
   runTests();
