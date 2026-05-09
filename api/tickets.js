@@ -1,7 +1,5 @@
 const { getSupabaseAdmin, requireSession, json, safeText, readJson } = require('./_utils');
 
-const VALID_STATUSES = new Set(['concluido', 'andamento', 'pendente', 'suporte']);
-
 function cleanTitle(value) {
   return safeText(value, 90);
 }
@@ -22,8 +20,19 @@ function cleanDate(value) {
   return safeText(value, 10) || new Date().toLocaleDateString('pt-BR');
 }
 
-function cleanStatus(value) {
-  return VALID_STATUSES.has(value) ? value : 'concluido';
+async function cleanStatus(supabase, value) {
+  const status = safeText(value, 60);
+  if (!status) return 'concluido';
+
+  const { data, error } = await supabase
+    .from('pj1_statuses')
+    .select('codigo')
+    .eq('codigo', status)
+    .eq('ativo', true)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? status : 'concluido';
 }
 
 function serializeTicket(row) {
@@ -65,7 +74,7 @@ module.exports = async function handler(req, res) {
       const titulo = cleanTitle(body.titulo);
       const descricao = cleanDescription(body.descricao);
       const solicitante = cleanRequester(body.solicitante);
-      const status = cleanStatus(body.status);
+      const status = await cleanStatus(supabase, body.status);
       const dataCampo = cleanDate(body.data);
 
       if (!titulo || !descricao) {
@@ -119,7 +128,8 @@ module.exports = async function handler(req, res) {
       }
 
       if (Object.prototype.hasOwnProperty.call(body, 'status')) {
-        if (!VALID_STATUSES.has(body.status)) return json(res, 400, { error: 'Status inválido' });
+        const checkedStatus = await cleanStatus(supabase, body.status);
+        if (checkedStatus !== body.status) return json(res, 400, { error: 'Status inválido' });
         patch.status = body.status;
       }
 
