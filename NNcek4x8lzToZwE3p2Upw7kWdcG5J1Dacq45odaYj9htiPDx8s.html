@@ -25,7 +25,18 @@
           <button class="logout-btn" id="logoutBtn" type="button">Sair</button>
         </div>
       </div>
-      <button class="add-btn" id="addTicketBtn" type="button" title="Adicionar chamado" aria-label="Adicionar chamado"></button>
+      <div class="search-actions">
+        <div class="search-box" id="searchBox">
+          <select id="searchFilter" title="Filtro de pesquisa" aria-label="Filtro de pesquisa">
+            <option value="titulo">Título</option>
+            <option value="solicitante">Solicitante</option>
+            <option value="status">Status</option>
+          </select>
+          <input id="searchInput" type="search" placeholder="Pesquisar..." maxlength="80" autocomplete="off" spellcheck="false" aria-label="Campo de pesquisa">
+        </div>
+        <button class="search-btn" id="searchBtn" type="button" title="Pesquisar chamados" aria-label="Pesquisar chamados"></button>
+        <button class="add-btn" id="addTicketBtn" type="button" title="Adicionar chamado" aria-label="Adicionar chamado"></button>
+      </div>
     </section>
     <section class="panel">
       <div id="doneCards" class="cards"></div>
