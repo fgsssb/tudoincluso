@@ -427,11 +427,11 @@ button {
 }
 
 .status.progress {
-  color: var(--yellow);
+  color: var(--blue);
 }
 
 .status.pending {
-  color: var(--blue);
+  color: var(--yellow);
 }
 
 .status.support {
@@ -515,7 +515,7 @@ button {
   content: '✎';
 }
 
-.context-item.support-action::before {
+.context-item.status-action::before {
   content: '↗';
   background: rgba(255, 107, 107, .10);
   border-color: rgba(255, 107, 107, .18);
@@ -527,7 +527,7 @@ button {
 }
 
 .context-item.danger:hover,
-.context-item.support-action:hover {
+.context-item.status-action:hover {
   background: rgba(255, 107, 107, .08);
   border-color: rgba(255, 107, 107, .18);
   color: #ffe8e8;
