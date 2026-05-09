@@ -879,6 +879,51 @@ async function logout() {
   window.location.href = LOGIN_URL;
 }
 
+function isTypingTarget(target) {
+  if (!target) return false;
+
+  const tag = String(target.tagName || '').toLowerCase();
+
+  return (
+    tag === 'input' ||
+    tag === 'textarea' ||
+    tag === 'select' ||
+    target.isContentEditable
+  );
+}
+
+function isBackdropOpen(id) {
+  const el = document.getElementById(id);
+  return Boolean(el && el.classList.contains('is-open'));
+}
+
+function handleGlobalHotkeys(event) {
+  if (event.ctrlKey || event.altKey || event.metaKey) return;
+  if (isTypingTarget(event.target)) return;
+
+  const key = event.key.toLowerCase();
+
+  if (key === 'n') {
+    event.preventDefault();
+    closeContextMenu();
+    closeUserMenu();
+    openModal();
+    return;
+  }
+
+  if (event.key === 'Delete') {
+    event.preventDefault();
+
+    if (!isBackdropOpen('detailBackdrop') || !getSelectedTicket()) {
+      notify('Abra um chamado para excluir com DEL.');
+      return;
+    }
+
+    deleteSelectedTicket();
+  }
+}
+
+
 function runTests() {
   console.assert(getStatusInfo('suporte').nome === 'Aguardando suporte', 'Teste status suporte falhou');
   console.assert(getStatusInfo('pendente').nome === 'Pendente - Conferir descrição', 'Teste status pendente falhou');
@@ -893,6 +938,7 @@ function runTests() {
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
   console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
   console.assert(brDateToInputDate('09/05/2026') === '2026-05-09', 'Teste data BR falhou');
+  console.assert(isTypingTarget(document.createElement('input')) === true, 'Teste hotkey typing target falhou');
   console.assert(normalizeSearchValue('09/05/2026').includes('09'), 'Teste busca por data falhou');
 }
 
@@ -1018,6 +1064,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeContextMenu();
     closeUserMenu();
   });
+  document.addEventListener('keydown', handleGlobalHotkeys);
+
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       closeContextMenu();
