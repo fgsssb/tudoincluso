@@ -37,7 +37,7 @@ function getCompletedByText(ticket) {
     return '';
   }
 
-  return ` por: ${normalized.concluido_por_nome}`;
+  return ` por ${normalized.concluido_por_nome}`;
 }
 
 function isValidStatus(status) {
