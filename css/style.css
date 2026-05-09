@@ -421,6 +421,20 @@ button {
   box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
 }
 
+.card.highlighted {
+  border-color: rgba(255, 107, 107, .85);
+  box-shadow:
+    0 0 0 1px rgba(255, 107, 107, .16),
+    inset 0 1px 0 rgba(255, 255, 255, .025);
+}
+
+.card.highlighted:hover {
+  border-color: rgba(255, 107, 107, .95);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, .18),
+    0 0 0 1px rgba(255, 107, 107, .22);
+}
+
 .card.new-card {
   animation: newCardIn .48s ease both, savedPulse 1.15s ease .15s both;
 }
@@ -643,12 +657,21 @@ button {
   color: var(--red);
 }
 
+.context-item.highlight-action::before {
+  content: '!';
+  background: rgba(255, 107, 107, .10);
+  border-color: rgba(255, 107, 107, .18);
+  color: var(--red);
+  font-weight: 900;
+}
+
 .context-item.is-hidden {
   display: none;
 }
 
 .context-item.danger:hover,
-.context-item.status-action:hover {
+.context-item.status-action:hover,
+.context-item.highlight-action:hover {
   background: rgba(255, 107, 107, .08);
   border-color: rgba(255, 107, 107, .18);
   color: #ffe8e8;
