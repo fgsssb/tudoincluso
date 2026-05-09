@@ -175,9 +175,54 @@
   <div id="adminPanelBackdrop" class="modal-backdrop">
     <div class="modal admin-panel-modal">
       <h2>Painel admin</h2>
-      <p class="confirm-text">Área reservada para funções administrativas futuras.</p>
+      <div class="admin-options">
+        <button class="admin-option-card" id="manageUsersBtn" type="button">
+          <span class="admin-option-icon users"></span>
+          <span class="admin-option-info">
+            <strong>Gerenciar usuários</strong>
+            <small>Criar usuários e remover acessos do sistema.</small>
+          </span>
+        </button>
+      </div>
       <div class="modal-actions">
         <button class="secondary" id="closeAdminPanelBtn" type="button">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="userManageBackdrop" class="modal-backdrop">
+    <div class="modal user-manage-modal">
+      <h2>Gerenciar usuários</h2>
+
+      <div class="form-grid">
+        <input id="newUserLogin" type="text" placeholder="Usuário/login" maxlength="40" autocomplete="off" spellcheck="false">
+        <input id="newUserName" type="text" placeholder="Nome exibido" maxlength="60" autocomplete="off" spellcheck="false">
+        <input id="newUserPassword" type="password" placeholder="Senha" maxlength="80" autocomplete="off" spellcheck="false">
+        <select id="newUserRole">
+          <option value="ti">TI</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button id="saveNewUserBtn" type="button">Criar usuário</button>
+      </div>
+
+      <div class="user-remove-area">
+        <span class="user-remove-title">Usuários ativos</span>
+        <div class="user-remove-list" id="userRemoveList"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary" id="closeUserManageBtn" type="button">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="userDeleteConfirmBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Remover usuário</h2>
+      <p class="confirm-text" id="userDeleteConfirmText">Tem certeza que deseja remover esse usuário?</p>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelUserDeleteBtn" type="button">Cancelar</button>
+        <button class="danger-btn" id="confirmUserDeleteBtn" type="button">Remover</button>
       </div>
     </div>
   </div>
