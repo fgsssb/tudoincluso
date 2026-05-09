@@ -269,11 +269,263 @@ async function setupRealtime() {
     .subscribe();
 }
 
+let pendingCsvRows = null;
+
+function openCsvTools() {
+  openBackdrop('csvToolsBackdrop');
+}
+
+function closeCsvTools() {
+  closeBackdrop('csvToolsBackdrop');
+  const input = document.getElementById('csvFileInput');
+  if (input) input.value = '';
+}
+
+function closeCsvImportConfirm() {
+  closeBackdrop('csvImportConfirmBackdrop');
+  pendingCsvRows = null;
+  const input = document.getElementById('csvFileInput');
+  if (input) input.value = '';
+}
+
+function csvEscape(value) {
+  const text = String(value ?? '');
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+
+function ticketsToCsv() {
+  const headers = ['id', 'titulo', 'descricao', 'solicitante', 'status', 'data'];
+  const rows = tickets.map((ticket) => {
+    const normalized = normalizeTicket(ticket);
+    return headers.map((key) => csvEscape(normalized[key])).join(',');
+  });
+
+  return '\ufeff' + headers.map(csvEscape).join(',') + '\n' + rows.join('\n');
+}
+
+function getCsvFileName() {
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, '0');
+  const stamp = [
+    now.getFullYear(),
+    pad(now.getMonth() + 1),
+    pad(now.getDate())
+  ].join('-');
+
+  return `chamados-ti-${stamp}.csv`;
+}
+
+async function exportCsv() {
+  if (!tickets.length) {
+    notify('Não há chamados para exportar.');
+    return;
+  }
+
+  const csv = ticketsToCsv();
+  const fileName = getCsvFileName();
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+
+  try {
+    if ('showSaveFilePicker' in window) {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [
+          {
+            description: 'Arquivo CSV',
+            accept: { 'text/csv': ['.csv'] }
+          }
+        ]
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    } else {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    closeCsvTools();
+    notify('CSV exportado.');
+  } catch (error) {
+    if (error && error.name === 'AbortError') return;
+    notify('Não foi possível exportar o CSV.');
+  }
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let insideQuotes = false;
+
+  const source = String(text || '').replace(/^\ufeff/, '');
+
+  for (let i = 0; i < source.length; i += 1) {
+    const char = source[i];
+    const next = source[i + 1];
+
+    if (insideQuotes) {
+      if (char === '"' && next === '"') {
+        field += '"';
+        i += 1;
+      } else if (char === '"') {
+        insideQuotes = false;
+      } else {
+        field += char;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      insideQuotes = true;
+      continue;
+    }
+
+    if (char === ',') {
+      row.push(field);
+      field = '';
+      continue;
+    }
+
+    if (char === '\n') {
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = '';
+      continue;
+    }
+
+    if (char !== '\r') field += char;
+  }
+
+  row.push(field);
+  rows.push(row);
+
+  return rows.filter((csvRow) => csvRow.some((cell) => String(cell).trim() !== ''));
+}
+
+function csvRowsToTickets(rows) {
+  if (!rows.length) return [];
+
+  const headers = rows[0].map((header) => sanitizeText(header, 40).toLowerCase());
+  const required = ['titulo', 'descricao', 'solicitante', 'status', 'data'];
+  const hasRequired = required.every((field) => headers.includes(field));
+
+  if (!hasRequired) {
+    throw new Error('CSV inválido. Colunas necessárias: titulo, descricao, solicitante, status, data.');
+  }
+
+  return rows.slice(1).map((row) => {
+    const raw = {};
+
+    headers.forEach((header, index) => {
+      raw[header] = row[index] || '';
+    });
+
+    return normalizeTicket({
+      id: sanitizeText(raw.id, 80) || crypto.randomUUID(),
+      titulo: raw.titulo,
+      descricao: raw.descricao,
+      solicitante: raw.solicitante,
+      status: raw.status,
+      data: raw.data
+    });
+  }).filter((ticket) => ticket.titulo && ticket.descricao);
+}
+
+function askCsvFile() {
+  const input = document.getElementById('csvFileInput');
+  input.value = '';
+  input.click();
+}
+
+async function handleCsvFileSelected(event) {
+  const file = event.target.files && event.target.files[0];
+
+  if (!file) return;
+
+  if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv') {
+    notify('Selecione um arquivo CSV.');
+    event.target.value = '';
+    return;
+  }
+
+  try {
+    const text = await file.text();
+    const rows = parseCsv(text);
+    const importedTickets = csvRowsToTickets(rows);
+
+    if (!importedTickets.length) {
+      notify('CSV sem chamados válidos.');
+      event.target.value = '';
+      return;
+    }
+
+    pendingCsvRows = importedTickets;
+    document.getElementById('csvImportConfirmText').textContent =
+      `Deseja importar os dados desse CSV? ${importedTickets.length} chamado(s) serão carregados.`;
+    closeCsvTools();
+    openBackdrop('csvImportConfirmBackdrop');
+  } catch (error) {
+    notify(error.message || 'Não foi possível ler o CSV.');
+    event.target.value = '';
+  }
+}
+
+function confirmCsvImport() {
+  if (!Array.isArray(pendingCsvRows) || !pendingCsvRows.length) {
+    closeCsvImportConfirm();
+    return;
+  }
+
+  const byId = new Map(tickets.map((ticket) => [ticket.id, ticket]));
+  let added = 0;
+  let updated = 0;
+
+  pendingCsvRows.forEach((ticket) => {
+    const normalized = normalizeTicket(ticket);
+    const existing = byId.get(normalized.id);
+
+    if (existing) {
+      existing.titulo = normalized.titulo;
+      existing.descricao = normalized.descricao;
+      existing.solicitante = normalized.solicitante;
+      existing.status = normalized.status;
+      existing.data = normalized.data;
+      existing.isNew = true;
+      updated += 1;
+    } else {
+      tickets.unshift({ ...normalized, isNew: true });
+      added += 1;
+    }
+  });
+
+  saveTickets();
+  render();
+  closeCsvImportConfirm();
+  notify(`CSV importado. ${added} novo(s), ${updated} atualizado(s).`);
+
+  setTimeout(() => {
+    tickets.forEach((ticket) => {
+      ticket.isNew = false;
+    });
+    render();
+  }, 1400);
+}
+
 function runTests() {
   console.assert(getStatusInfo('suporte').text === 'Aguardando suporte', 'Teste status suporte falhou');
   console.assert(escapeHtml('<x>') === '&lt;x&gt;', 'Teste escapeHtml falhou');
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
+  console.assert(parseCsv(ticketsToCsv()).length >= 2, 'Teste CSV export/import falhou');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -282,6 +534,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   render();
   setupRealtime();
 
+  document.getElementById('csvToolsBtn').addEventListener('click', openCsvTools);
+  document.getElementById('cancelCsvToolsBtn').addEventListener('click', closeCsvTools);
+  document.getElementById('importCsvBtn').addEventListener('click', askCsvFile);
+  document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+  document.getElementById('csvFileInput').addEventListener('change', handleCsvFileSelected);
+  document.getElementById('cancelCsvImportBtn').addEventListener('click', closeCsvImportConfirm);
+  document.getElementById('confirmCsvImportBtn').addEventListener('click', confirmCsvImport);
   document.getElementById('addTicketBtn').addEventListener('click', openModal);
   document.getElementById('cancelAddBtn').addEventListener('click', closeModal);
   document.getElementById('saveAddBtn').addEventListener('click', addTicket);
@@ -303,13 +562,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('doneCards').addEventListener('contextmenu', (event) => { const card = event.target.closest('.card'); if (card) openContextMenu(event, card.dataset.id); });
   document.getElementById('detailBackdrop').addEventListener('click', closeDetail);
   document.getElementById('detailModal').addEventListener('click', (event) => event.stopPropagation());
+  addBackdropClose('csvToolsBackdrop', closeCsvTools);
+  addBackdropClose('csvImportConfirmBackdrop', closeCsvImportConfirm);
   addBackdropClose('modalBackdrop', closeModal);
   addBackdropClose('editTitleBackdrop', closeEditTitleModal);
   addBackdropClose('editRequesterBackdrop', closeEditRequesterModal);
   addBackdropClose('editDescriptionBackdrop', closeEditDescriptionModal);
   addBackdropClose('deleteConfirmBackdrop', closeDeleteConfirm);
   document.addEventListener('click', closeContextMenu);
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { closeContextMenu(); closeDetail(); closeModal(); closeEditTitleModal(); closeEditRequesterModal(); closeEditDescriptionModal(); closeDeleteConfirm(); } });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { closeContextMenu(); closeDetail(); closeModal(); closeEditTitleModal(); closeEditRequesterModal(); closeEditDescriptionModal(); closeDeleteConfirm(); closeCsvTools(); closeCsvImportConfirm(); } });
   document.getElementById('editTitleInput').addEventListener('keydown', (event) => { if (event.key === 'Enter') saveEditedTitle(); if (event.key === 'Escape') closeEditTitleModal(); });
   document.getElementById('editRequesterInput').addEventListener('keydown', (event) => { if (event.key === 'Enter') saveEditedRequester(); if (event.key === 'Escape') closeEditRequesterModal(); });
   document.getElementById('editDescriptionInput').addEventListener('keydown', (event) => { if (event.key === 'Escape') closeEditDescriptionModal(); if (event.key === 'Enter' && event.ctrlKey) saveEditedDescription(); });
