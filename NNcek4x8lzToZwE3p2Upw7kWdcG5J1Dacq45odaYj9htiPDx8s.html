@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
   <meta name="referrer" content="no-referrer">
-  <title>TI Chamados</title>
+  <title>NNcek4x8lzToZwE3p2Upw7kWdcG5J1Dacq45odaYj9htiPDx8s</title>
   <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
@@ -18,11 +18,10 @@
           <span class="user-name" id="userName">Jean</span>
         </span>
       </div>
-      <div class="topbar-actions">
-        <button class="csv-tools-btn" id="csvToolsBtn" type="button" title="Importar/Exportar CSV" aria-label="Importar ou exportar CSV"></button>
-        <button class="add-btn" id="addTicketBtn" type="button" title="Adicionar chamado" aria-label="Adicionar chamado"></button>
-      </div>
+
+      <button class="add-btn" id="addTicketBtn" type="button" title="Adicionar chamado" aria-label="Adicionar chamado"></button>
     </section>
+
     <section class="panel">
       <div id="doneCards" class="cards"></div>
     </section>
@@ -31,16 +30,19 @@
   <div id="modalBackdrop" class="modal-backdrop">
     <div class="modal">
       <h2>Adicionar chamado</h2>
+
       <div class="form-grid">
         <input id="newTitle" type="text" placeholder="Título" maxlength="90" autocomplete="off" spellcheck="false">
         <textarea id="newDesc" placeholder="Descrição" maxlength="800" autocomplete="off" spellcheck="false"></textarea>
         <input id="newPerson" type="text" placeholder="Solicitado por" maxlength="60" autocomplete="off" spellcheck="false">
+
         <select id="newStatus">
           <option value="concluido">Concluído</option>
           <option value="andamento">Em andamento</option>
           <option value="suporte">Aguardando suporte</option>
         </select>
       </div>
+
       <div class="modal-actions">
         <button class="secondary" id="cancelAddBtn" type="button">Cancelar</button>
         <button id="saveAddBtn" type="button">Salvar</button>
@@ -49,7 +51,9 @@
   </div>
 
   <div id="detailBackdrop" class="modal-backdrop">
-    <div class="modal" id="detailModal"><div id="detailContent" class="detail-grid"></div></div>
+    <div class="modal" id="detailModal">
+      <div id="detailContent" class="detail-grid"></div>
+    </div>
   </div>
 
   <div id="contextMenu" class="context-menu">
@@ -60,46 +64,59 @@
     <button class="context-item support-action" id="moveSupportBtn" type="button">Mudar status para suporte</button>
   </div>
 
-  <div id="editTitleBackdrop" class="modal-backdrop"><div class="modal"><h2>Editar título</h2><div class="form-grid"><input id="editTitleInput" type="text" placeholder="Novo título" maxlength="90" autocomplete="off" spellcheck="false"></div><div class="modal-actions"><button class="secondary" id="cancelEditTitleBtn" type="button">Cancelar</button><button id="saveEditTitleBtn" type="button">Salvar</button></div></div></div>
-  <div id="editRequesterBackdrop" class="modal-backdrop"><div class="modal"><h2>Editar solicitante</h2><div class="form-grid"><input id="editRequesterInput" type="text" placeholder="Novo solicitante" maxlength="60" autocomplete="off" spellcheck="false"></div><div class="modal-actions"><button class="secondary" id="cancelEditRequesterBtn" type="button">Cancelar</button><button id="saveEditRequesterBtn" type="button">Salvar</button></div></div></div>
-  <div id="editDescriptionBackdrop" class="modal-backdrop"><div class="modal"><h2>Editar descrição</h2><div class="form-grid"><textarea id="editDescriptionInput" placeholder="Nova descrição" maxlength="800" autocomplete="off" spellcheck="false"></textarea></div><div class="modal-actions"><button class="secondary" id="cancelEditDescriptionBtn" type="button">Cancelar</button><button id="saveEditDescriptionBtn" type="button">Salvar</button></div></div></div>
-  <div id="deleteConfirmBackdrop" class="modal-backdrop"><div class="modal"><h2>Excluir chamado</h2><p class="confirm-text">Tem certeza que deseja excluir esse chamado?</p><div class="modal-actions"><button class="secondary" id="cancelDeleteBtn" type="button">Cancelar</button><button class="danger-btn" id="confirmDeleteBtn" type="button">Excluir</button></div></div></div>
-  <div id="csvToolsBackdrop" class="modal-backdrop">
-    <div class="modal csv-modal">
-      <h2>Dados CSV</h2>
-      <div class="csv-options">
-        <button class="csv-option-card" id="importCsvBtn" type="button">
-          <span class="csv-option-icon import"></span>
-          <span class="csv-option-info">
-            <strong>Importar CSV</strong>
-            <small>Carregar chamados salvos em outro computador.</small>
-          </span>
-        </button>
+  <div id="editTitleBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Editar título</h2>
 
-        <button class="csv-option-card" id="exportCsvBtn" type="button">
-          <span class="csv-option-icon export"></span>
-          <span class="csv-option-info">
-            <strong>Exportar CSV</strong>
-            <small>Baixar todos os chamados em uma planilha CSV.</small>
-          </span>
-        </button>
+      <div class="form-grid">
+        <input id="editTitleInput" type="text" placeholder="Novo título" maxlength="90" autocomplete="off" spellcheck="false">
       </div>
 
-      <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
-
       <div class="modal-actions">
-        <button class="secondary" id="cancelCsvToolsBtn" type="button">Cancelar</button>
+        <button class="secondary" id="cancelEditTitleBtn" type="button">Cancelar</button>
+        <button id="saveEditTitleBtn" type="button">Salvar</button>
       </div>
     </div>
   </div>
 
-  <div id="csvImportConfirmBackdrop" class="modal-backdrop">
+  <div id="editRequesterBackdrop" class="modal-backdrop">
     <div class="modal">
-      <h2>Importar CSV</h2>
-      <p class="confirm-text" id="csvImportConfirmText">Deseja importar os dados desse CSV?</p>
+      <h2>Editar solicitante</h2>
+
+      <div class="form-grid">
+        <input id="editRequesterInput" type="text" placeholder="Novo solicitante" maxlength="60" autocomplete="off" spellcheck="false">
+      </div>
+
       <div class="modal-actions">
-        <button class="secondary" id="cancelCsvImportBtn" type="button">Cancelar</button>
-        <button id="confirmCsvImportBtn" type="button">Importar</button>
+        <button class="secondary" id="cancelEditRequesterBtn" type="button">Cancelar</button>
+        <button id="saveEditRequesterBtn" type="button">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="editDescriptionBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Editar descrição</h2>
+
+      <div class="form-grid">
+        <textarea id="editDescriptionInput" placeholder="Nova descrição" maxlength="800" autocomplete="off" spellcheck="false"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary" id="cancelEditDescriptionBtn" type="button">Cancelar</button>
+        <button id="saveEditDescriptionBtn" type="button">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteConfirmBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Excluir chamado</h2>
+      <p class="confirm-text">Tem certeza que deseja excluir esse chamado?</p>
+
+      <div class="modal-actions">
+        <button class="secondary" id="cancelDeleteBtn" type="button">Cancelar</button>
+        <button class="danger-btn" id="confirmDeleteBtn" type="button">Excluir</button>
       </div>
     </div>
   </div>
