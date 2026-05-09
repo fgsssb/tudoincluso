@@ -5,11 +5,12 @@ const STORAGE_KEY = 'pj1_tickets_cache_v2';
 const LOGIN_URL = '/index.html';
 
 const LIMITS = Object.freeze({ title: 90, requester: 60, description: 800 });
-const ALLOWED_STATUSES = Object.freeze(['concluido', 'andamento', 'suporte']);
+const ALLOWED_STATUSES = Object.freeze(['concluido', 'andamento', 'pendente', 'suporte']);
 
 const statusMap = Object.freeze({
   concluido: { text: 'Concluído', className: 'done' },
   andamento: { text: 'Em andamento', className: 'progress' },
+  pendente: { text: 'Pendente - Conferir descrição', className: 'pending' },
   suporte: { text: 'Aguardando suporte', className: 'support' }
 });
 
@@ -513,6 +514,7 @@ async function setupRealtime() {
 
 function runTests() {
   console.assert(getStatusInfo('suporte').text === 'Aguardando suporte', 'Teste status suporte falhou');
+  console.assert(getStatusInfo('pendente').text === 'Pendente - Conferir descrição', 'Teste status pendente falhou');
   console.assert(escapeHtml('<x>') === '&lt;x&gt;', 'Teste escapeHtml falhou');
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
