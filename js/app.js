@@ -158,6 +158,7 @@ function normalizeTicket(raw) {
     atualizado_por: raw.atualizado_por || null,
     criado_em: raw.criado_em || null,
     atualizado_em: raw.atualizado_em || null,
+    destacado: Boolean(raw.destacado),
     isNew: Boolean(raw.isNew)
   };
 }
@@ -231,7 +232,7 @@ function buildCardHtml(item, index) {
   const statusInfo = getStatusInfo(ticket.status);
 
   return [
-    '<article class="card ', ticket.isNew ? 'new-card' : '', '" style="animation-delay: ', Math.min(index * 35, 240), 'ms" data-id="', escapeHtml(ticket.id), '" title="Clique para ver o chamado completo">',
+    '<article class="card ', ticket.isNew ? 'new-card ' : '', ticket.destacado ? 'highlighted' : '', '" style="animation-delay: ', Math.min(index * 35, 240), 'ms" data-id="', escapeHtml(ticket.id), '" title="Clique para ver o chamado completo">',
       '<div class="card-head"><h3 class="card-title">', escapeHtml(ticket.titulo), '</h3><span class="card-date">', escapeHtml(ticket.data), '</span></div>',
       '<div class="meta"><span class="requester"><strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong><span class="meta-separator">,</span></span><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span></div>',
       '<span class="card-open-hint" aria-hidden="true"></span>',
@@ -556,6 +557,7 @@ function openContextMenu(event, id) {
 
   selectedTicketId = id;
   document.getElementById('changeStatusBtn').classList.toggle('is-hidden', ticket.status !== 'pendente');
+  document.getElementById('toggleHighlightBtn').textContent = ticket.destacado ? 'Remover destaque' : 'Destacar chamado';
 
   const menu = document.getElementById('contextMenu');
   menu.style.left = event.clientX + 'px';
@@ -642,6 +644,21 @@ async function saveStatusChange() {
   const info = getStatusInfo(status);
   const ok = await updateTicket(ticket.id, { status }, `Status alterado para ${info.nome}.`);
   if (ok) closeStatusChangeModal();
+}
+
+
+async function toggleSelectedHighlight() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const destacado = !ticket.destacado;
+  const ok = await updateTicket(
+    ticket.id,
+    { destacado },
+    destacado ? 'Chamado destacado.' : 'Destaque removido.'
+  );
+
+  if (ok) closeContextMenu();
 }
 
 function openEditTitleModal() {
@@ -850,6 +867,7 @@ function runTests() {
   console.assert(escapeHtml('<x>') === '&lt;x&gt;', 'Teste escapeHtml falhou');
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
+  console.assert(normalizeTicket({ destacado: true }).destacado === true, 'Teste destacado falhou');
   console.assert(getStatusStyle('concluido').includes('#39d98a'), 'Teste cor status falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
   console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
@@ -933,6 +951,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('editDescriptionMenuBtn').addEventListener('click', openEditDescriptionModal);
   document.getElementById('editDateMenuBtn').addEventListener('click', openEditDateModal);
   document.getElementById('changeStatusBtn').addEventListener('click', openStatusChangeModal);
+  document.getElementById('toggleHighlightBtn').addEventListener('click', toggleSelectedHighlight);
 
   document.getElementById('cancelEditTitleBtn').addEventListener('click', closeEditTitleModal);
   document.getElementById('saveEditTitleBtn').addEventListener('click', saveEditedTitle);
