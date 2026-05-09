@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; script-src 'self'; style-src 'self' data:; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
+  <title>Login - Chamados TI</title>
+  <link rel="stylesheet" href="./css/login.css">
+</head>
+<body>
+  <main class="login-page">
+    <section class="login-shell">
+      <section class="login-card" id="loginCard">
+        <form class="form-grid" id="loginForm" autocomplete="off">
+          <div class="field">
+            <label for="loginUser">Usuário</label>
+            <input id="loginUser" name="loginUser" type="text" placeholder="Ex: jean" maxlength="40" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="loginPassword">Senha</label>
+            <div class="input-wrap">
+              <input class="password-input" id="loginPassword" name="loginPassword" type="password" placeholder="Digite sua senha" maxlength="80" autocomplete="off" spellcheck="false">
+              <button class="password-toggle" id="togglePassword" type="button" title="Mostrar/ocultar senha" aria-label="Mostrar ou ocultar senha">•••</button>
+            </div>
+          </div>
+          <button class="login-btn" type="submit">Entrar</button>
+        </form>
+        <div class="login-footer">
+          <span class="safe-note">Sessão protegida</span>
+          <span class="version">v1.0.08.05.26</span>
+        </div>
+      </section>
+    </section>
+  </main>
+  <div id="toast" class="toast"></div>
+  <script src="./js/login.js" defer></script>
+</body>
+</html>
