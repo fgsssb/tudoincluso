@@ -264,12 +264,7 @@ function buildCardHtml(item, index) {
   return [
     '<article class="card ', ticket.isNew ? 'new-card ' : '', ticket.destacado ? 'highlighted' : '', '" style="animation-delay: ', Math.min(index * 35, 240), 'ms" data-id="', escapeHtml(ticket.id), '" title="Clique para ver o chamado completo">',
       '<div class="card-head"><h3 class="card-title">', escapeHtml(ticket.titulo), '</h3><span class="card-date">', escapeHtml(ticket.data), '</span></div>',
-      '<div class="meta"><span class="requester"><strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong><span class="meta-separator">,</span></span>'<span class="status-line">',
-  '<span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span>',
-  ticket.status === 'concluido' && ticket.concluido_por_nome
-    ? ' <span class="status-normal">por</span> <span class="status" ' + getStatusStyle(ticket.status) + '>' + escapeHtml(ticket.concluido_por_nome) + '</span>'
-    : '',
-'</span>'</div>',
+      '<div class="meta"><span class="requester"><strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong><span class="meta-separator">,</span></span><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), escapeHtml(getCompletedByText(ticket)), '</span></div>',
       '<span class="card-open-hint" aria-hidden="true"></span>',
     '</article>'
   ].join('');
