@@ -30,6 +30,16 @@ function getStatusStyle(status) {
   return `style="color: ${escapeHtml(info.cor || '#8c96a8')}"`;
 }
 
+function getCompletedByText(ticket) {
+  const normalized = normalizeTicket(ticket);
+
+  if (normalized.status !== 'concluido' || !normalized.concluido_por_nome) {
+    return '';
+  }
+
+  return ` por: ${normalized.concluido_por_nome}`;
+}
+
 function isValidStatus(status) {
   return statuses.some((item) => item.codigo === status);
 }
@@ -158,6 +168,8 @@ function normalizeTicket(raw) {
     atualizado_por: raw.atualizado_por || null,
     criado_em: raw.criado_em || null,
     atualizado_em: raw.atualizado_em || null,
+    concluido_por: raw.concluido_por || null,
+    concluido_por_nome: sanitizeText(raw.concluido_por_nome, 80) || '',
     destacado: Boolean(raw.destacado),
     isNew: Boolean(raw.isNew)
   };
@@ -252,7 +264,7 @@ function buildCardHtml(item, index) {
   return [
     '<article class="card ', ticket.isNew ? 'new-card ' : '', ticket.destacado ? 'highlighted' : '', '" style="animation-delay: ', Math.min(index * 35, 240), 'ms" data-id="', escapeHtml(ticket.id), '" title="Clique para ver o chamado completo">',
       '<div class="card-head"><h3 class="card-title">', escapeHtml(ticket.titulo), '</h3><span class="card-date">', escapeHtml(ticket.data), '</span></div>',
-      '<div class="meta"><span class="requester"><strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong><span class="meta-separator">,</span></span><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span></div>',
+      '<div class="meta"><span class="requester"><strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong><span class="meta-separator">,</span></span><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), escapeHtml(getCompletedByText(ticket)), '</span></div>',
       '<span class="card-open-hint" aria-hidden="true"></span>',
     '</article>'
   ].join('');
@@ -523,7 +535,7 @@ function openDetail(id) {
   document.getElementById('detailContent').innerHTML = [
     '<div class="detail-top"><h2 class="detail-title">', escapeHtml(ticket.titulo), '</h2><span class="detail-date">', escapeHtml(ticket.data), '</span></div>',
     '<div class="detail-desc">', escapeHtml(ticket.descricao), '</div>',
-    '<div class="detail-meta"><span class="requester">Solicitado por: <strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong></span><span class="detail-status-wrap"><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span>', finishButton, '</span></div>'
+    '<div class="detail-meta"><span class="requester">Solicitado por: <strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong>', ticket.status === 'concluido' && ticket.concluido_por_nome ? '<span class="meta-separator">,</span> Concluído por: <strong class="requester-name">' + escapeHtml(ticket.concluido_por_nome) + '</strong>' : '', '</span><span class="detail-status-wrap"><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span>', finishButton, '</span></div>'
   ].join('');
 
   const finishTicketBtn = document.getElementById('finishTicketBtn');
@@ -931,6 +943,7 @@ function runTests() {
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
   console.assert(normalizeTicket({ destacado: true }).destacado === true, 'Teste destacado falhou');
+  console.assert(getCompletedByText({ status: 'concluido', concluido_por_nome: 'TIMC1' }).includes('TIMC1'), 'Teste concluido por falhou');
   console.assert(getStatusPriority('pendente') < getStatusPriority('concluido'), 'Teste prioridade pendente falhou');
   console.assert(getStatusPriority('suporte') < getStatusPriority('concluido'), 'Teste prioridade suporte falhou');
   console.assert(getStatusPriority('andamento') < getStatusPriority('concluido'), 'Teste prioridade andamento falhou');
