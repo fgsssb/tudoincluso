@@ -809,6 +809,135 @@ function addBackdropClose(id, closeFn) {
   });
 }
 
+let adminUsers = [];
+let pendingUserDeleteId = null;
+
+async function apiAdminRequest(options = {}) {
+  return apiRequest('/api/admin', options);
+}
+
+async function loadAdminUsers() {
+  if (!isAdminUser()) return;
+
+  try {
+    const data = await apiAdminRequest({ method: 'GET' });
+    adminUsers = Array.isArray(data.users) ? data.users : [];
+    renderAdminUsers();
+  } catch (error) {
+    notify(error.message || 'Erro ao carregar usuários.');
+  }
+}
+
+function renderAdminUsers() {
+  const list = document.getElementById('userRemoveList');
+  if (!list) return;
+
+  list.innerHTML = adminUsers.length
+    ? adminUsers.map((user) => [
+      '<div class="user-remove-item">',
+        '<span class="user-remove-left">',
+          '<span class="user-remove-name">', escapeHtml(user.nome || user.login), '</span>',
+          '<span class="user-remove-meta">', escapeHtml(user.login), ' · ', escapeHtml(user.role || 'ti'), '</span>',
+        '</span>',
+        '<button class="user-remove-btn" type="button" data-user-id="', escapeHtml(user.id), '" ', user.id === currentUser?.id ? 'disabled title="Você não pode remover sua própria conta"' : 'title="Remover usuário"', '>×</button>',
+      '</div>'
+    ].join('')).join('')
+    : '<div class="empty">Nenhum usuário encontrado.</div>';
+}
+
+function openUserManage() {
+  if (!isAdminUser()) {
+    notify('Acesso restrito ao administrador.');
+    return;
+  }
+
+  closeAdminPanel();
+  openBackdrop('userManageBackdrop');
+  loadAdminUsers();
+  setTimeout(() => document.getElementById('newUserLogin').focus(), 120);
+}
+
+function closeUserManage() {
+  closeBackdrop('userManageBackdrop');
+  document.getElementById('newUserLogin').value = '';
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserPassword').value = '';
+  document.getElementById('newUserRole').value = 'ti';
+}
+
+async function createAdminUser() {
+  if (!isAdminUser()) return notify('Acesso restrito ao administrador.');
+
+  const login = sanitizeText(document.getElementById('newUserLogin').value, 40).toLowerCase();
+  const nome = sanitizeText(document.getElementById('newUserName').value, 60);
+  const senha = String(document.getElementById('newUserPassword').value || '').slice(0, 80);
+  const role = document.getElementById('newUserRole').value;
+
+  if (!login || login.length < 3) return notify('Usuário/login precisa ter pelo menos 3 caracteres.');
+  if (!senha || senha.length < 6) return notify('Senha precisa ter pelo menos 6 caracteres.');
+
+  try {
+    const data = await apiAdminRequest({
+      method: 'POST',
+      body: JSON.stringify({ login, nome: nome || login, senha, role })
+    });
+
+    const existingIndex = adminUsers.findIndex((user) => user.id === data.user.id);
+
+    if (existingIndex >= 0) {
+      adminUsers[existingIndex] = data.user;
+    } else {
+      adminUsers.push(data.user);
+    }
+
+    adminUsers.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || '')));
+    renderAdminUsers();
+
+    document.getElementById('newUserLogin').value = '';
+    document.getElementById('newUserName').value = '';
+    document.getElementById('newUserPassword').value = '';
+    document.getElementById('newUserRole').value = 'ti';
+
+    notify('Usuário criado.');
+  } catch (error) {
+    notify(error.message || 'Erro ao criar usuário.');
+  }
+}
+
+function askRemoveUser(id) {
+  const user = adminUsers.find((item) => item.id === id);
+  if (!user) return;
+  if (user.id === currentUser?.id) return notify('Você não pode remover sua própria conta.');
+
+  pendingUserDeleteId = id;
+  document.getElementById('userDeleteConfirmText').textContent =
+    `Tem certeza que deseja remover o usuário "${user.nome || user.login}"?`;
+  openBackdrop('userDeleteConfirmBackdrop');
+}
+
+function closeUserDeleteConfirm() {
+  closeBackdrop('userDeleteConfirmBackdrop');
+  pendingUserDeleteId = null;
+}
+
+async function confirmRemoveUser() {
+  if (!pendingUserDeleteId) return;
+
+  try {
+    await apiAdminRequest({
+      method: 'DELETE',
+      body: JSON.stringify({ id: pendingUserDeleteId })
+    });
+
+    adminUsers = adminUsers.filter((user) => user.id !== pendingUserDeleteId);
+    renderAdminUsers();
+    closeUserDeleteConfirm();
+    notify('Usuário removido.');
+  } catch (error) {
+    notify(error.message || 'Erro ao remover usuário.');
+  }
+}
+
 function isAdminUser() {
   const role = String(currentUser?.role || '').toLowerCase();
   return role === 'admin';
@@ -975,10 +1104,9 @@ function runTests() {
   console.assert(getStatusPriority('andamento') < getStatusPriority('concluido'), 'Teste prioridade andamento falhou');
   console.assert(getStatusStyle('concluido').includes('#39d98a'), 'Teste cor status falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
-  const originalUserForRoleTest = currentUser;
   currentUser = { role: 'Admin' };
-  console.assert(isAdminUser() === true, 'Teste admin role puro falhou');
-  currentUser = originalUserForRoleTest;
+  console.assert(isAdminUser() === true, 'Teste admin role falhou');
+  currentUser = null;
   console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
   console.assert(brDateToInputDate('09/05/2026') === '2026-05-09', 'Teste data BR falhou');
   console.assert(isTypingTarget(document.createElement('input')) === true, 'Teste hotkey typing target falhou');
@@ -1013,6 +1141,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   document.getElementById('closeAdminPanelBtn').addEventListener('click', closeAdminPanel);
+  document.getElementById('manageUsersBtn').addEventListener('click', openUserManage);
+  document.getElementById('closeUserManageBtn').addEventListener('click', closeUserManage);
+  document.getElementById('saveNewUserBtn').addEventListener('click', createAdminUser);
+  document.getElementById('cancelUserDeleteBtn').addEventListener('click', closeUserDeleteConfirm);
+  document.getElementById('confirmUserDeleteBtn').addEventListener('click', confirmRemoveUser);
+  document.getElementById('newUserPassword').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') createAdminUser();
+    if (event.key === 'Escape') closeUserManage();
+  });
+
+  document.getElementById('userRemoveList').addEventListener('click', (event) => {
+    const btn = event.target.closest('.user-remove-btn');
+    if (!btn) return;
+    askRemoveUser(btn.dataset.userId);
+  });
+
 
   document.getElementById('searchBtn').addEventListener('click', (event) => {
     event.stopPropagation();
@@ -1103,6 +1247,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   addBackdropClose('statusManageBackdrop', closeStatusManage);
   addBackdropClose('statusDeleteConfirmBackdrop', closeStatusDeleteConfirm);
   addBackdropClose('adminPanelBackdrop', closeAdminPanel);
+  addBackdropClose('userManageBackdrop', closeUserManage);
+  addBackdropClose('userDeleteConfirmBackdrop', closeUserDeleteConfirm);
   addBackdropClose('modalBackdrop', closeModal);
   addBackdropClose('editTitleBackdrop', closeEditTitleModal);
   addBackdropClose('editRequesterBackdrop', closeEditRequesterModal);
@@ -1134,6 +1280,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeStatusManage();
       closeStatusDeleteConfirm();
       closeAdminPanel();
+      closeUserManage();
+      closeUserDeleteConfirm();
       searchOpen = false;
       const searchInput = document.getElementById('searchInput');
       if (searchInput) searchInput.value = '';
