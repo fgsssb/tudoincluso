@@ -52,7 +52,8 @@ function getFilteredTickets() {
     const searchMap = {
       titulo: normalized.titulo,
       solicitante: normalized.solicitante,
-      status: statusText
+      status: statusText,
+      data: normalized.data
     };
 
     return normalizeSearchValue(searchMap[filter] || '').includes(term);
@@ -638,6 +639,7 @@ function runTests() {
   console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
   console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
+  console.assert(normalizeSearchValue('09/05/2026').includes('09'), 'Teste busca por data falhou');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
