@@ -46,7 +46,8 @@ function serializeTicket(row) {
     criado_por: row.criado_por,
     atualizado_por: row.atualizado_por,
     criado_em: row.criado_em,
-    atualizado_em: row.atualizado_em
+    atualizado_em: row.atualizado_em,
+    destacado: Boolean(row.destacado)
   };
 }
 
@@ -60,7 +61,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('pj1_tickets')
-        .select('id,titulo,descricao,solicitante,status,data,criado_por,atualizado_por,criado_em,atualizado_em')
+        .select('id,titulo,descricao,solicitante,status,data,destacado,criado_por,atualizado_por,criado_em,atualizado_em')
         .eq('deletado', false)
         .order('criado_em', { ascending: false });
 
@@ -89,10 +90,11 @@ module.exports = async function handler(req, res) {
           solicitante,
           status,
           data: dataCampo,
+          destacado: false,
           criado_por: session.sub,
           atualizado_por: session.sub
         })
-        .select('id,titulo,descricao,solicitante,status,data,criado_por,atualizado_por,criado_em,atualizado_em')
+        .select('id,titulo,descricao,solicitante,status,data,destacado,criado_por,atualizado_por,criado_em,atualizado_em')
         .single();
 
       if (error) throw error;
@@ -137,12 +139,16 @@ module.exports = async function handler(req, res) {
         patch.data = cleanDate(body.data);
       }
 
+      if (Object.prototype.hasOwnProperty.call(body, 'destacado')) {
+        patch.destacado = Boolean(body.destacado);
+      }
+
       const { data, error } = await supabase
         .from('pj1_tickets')
         .update(patch)
         .eq('id', id)
         .eq('deletado', false)
-        .select('id,titulo,descricao,solicitante,status,data,criado_por,atualizado_por,criado_em,atualizado_em')
+        .select('id,titulo,descricao,solicitante,status,data,destacado,criado_por,atualizado_por,criado_em,atualizado_em')
         .single();
 
       if (error) throw error;
