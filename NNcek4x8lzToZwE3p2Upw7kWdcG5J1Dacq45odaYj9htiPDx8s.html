@@ -183,6 +183,14 @@
             <small>Criar usuários e remover acessos do sistema.</small>
           </span>
         </button>
+
+        <button class="admin-option-card" id="manageTicketsBtn" type="button">
+          <span class="admin-option-icon tickets"></span>
+          <span class="admin-option-info">
+            <strong>Gerenciar chamados</strong>
+            <small>Exportar chamados do Supabase em CSV com filtros.</small>
+          </span>
+        </button>
       </div>
       <div class="modal-actions">
         <button class="secondary" id="closeAdminPanelBtn" type="button">Fechar</button>
@@ -223,6 +231,44 @@
       <div class="modal-actions">
         <button class="secondary" id="cancelUserDeleteBtn" type="button">Cancelar</button>
         <button class="danger-btn" id="confirmUserDeleteBtn" type="button">Remover</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ticketExportBackdrop" class="modal-backdrop">
+    <div class="modal ticket-export-modal">
+      <h2>Gerenciar chamados</h2>
+      <p class="confirm-text">Exporte as informações dos chamados em CSV. Use os filtros ou baixe tudo.</p>
+
+      <div class="form-grid ticket-export-grid">
+        <div class="date-range-grid">
+          <div class="field-like">
+            <label for="exportStartDate">Data inicial</label>
+            <input id="exportStartDate" type="date" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field-like">
+            <label for="exportEndDate">Data final</label>
+            <input id="exportEndDate" type="date" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="field-like">
+          <label for="exportStatusFilter">Status</label>
+          <select id="exportStatusFilter">
+            <option value="">Todos os status</option>
+          </select>
+        </div>
+
+        <div class="field-like">
+          <label for="exportRequesterFilter">Solicitante</label>
+          <input id="exportRequesterFilter" type="text" placeholder="Ex: Bruna" maxlength="60" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary" id="closeTicketExportBtn" type="button">Cancelar</button>
+        <button class="secondary" id="exportAllTicketsBtn" type="button">Baixar tudo</button>
+        <button id="exportFilteredTicketsBtn" type="button">Exportar filtrado</button>
       </div>
     </div>
   </div>
