@@ -233,7 +233,7 @@ function buildCardHtml(item, index) {
   return [
     '<article class="card ', ticket.isNew ? 'new-card' : '', '" style="animation-delay: ', Math.min(index * 35, 240), 'ms" data-id="', escapeHtml(ticket.id), '" title="Clique para ver o chamado completo">',
       '<div class="card-head"><h3 class="card-title">', escapeHtml(ticket.titulo), '</h3><span class="card-date">', escapeHtml(ticket.data), '</span></div>',
-      '<div class="meta"><span class="requester"><strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong><span class="meta-separator">,</span></span><span class="status ', statusInfo.className, '">', statusInfo.text, '</span></div>',
+      '<div class="meta"><span class="requester"><strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong><span class="meta-separator">,</span></span><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span></div>',
       '<span class="card-open-hint" aria-hidden="true"></span>',
     '</article>'
   ].join('');
@@ -504,7 +504,7 @@ function openDetail(id) {
   document.getElementById('detailContent').innerHTML = [
     '<div class="detail-top"><h2 class="detail-title">', escapeHtml(ticket.titulo), '</h2><span class="detail-date">', escapeHtml(ticket.data), '</span></div>',
     '<div class="detail-desc">', escapeHtml(ticket.descricao), '</div>',
-    '<div class="detail-meta"><span class="requester">Solicitado por: <strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong></span><span class="detail-status-wrap"><span class="status ', statusInfo.className, '">', statusInfo.text, '</span>', finishButton, '</span></div>'
+    '<div class="detail-meta"><span class="requester">Solicitado por: <strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong></span><span class="detail-status-wrap"><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span>', finishButton, '</span></div>'
   ].join('');
 
   const finishTicketBtn = document.getElementById('finishTicketBtn');
