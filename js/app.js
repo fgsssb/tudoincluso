@@ -1104,9 +1104,10 @@ function runTests() {
   console.assert(getStatusPriority('andamento') < getStatusPriority('concluido'), 'Teste prioridade andamento falhou');
   console.assert(getStatusStyle('concluido').includes('#39d98a'), 'Teste cor status falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
+  const originalUserForAdminRoleTest = currentUser;
   currentUser = { role: 'Admin' };
   console.assert(isAdminUser() === true, 'Teste admin role falhou');
-  currentUser = null;
+  currentUser = originalUserForAdminRoleTest;
   console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
   console.assert(brDateToInputDate('09/05/2026') === '2026-05-09', 'Teste data BR falhou');
   console.assert(isTypingTarget(document.createElement('input')) === true, 'Teste hotkey typing target falhou');
