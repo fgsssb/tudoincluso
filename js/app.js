@@ -535,7 +535,7 @@ function openDetail(id) {
   document.getElementById('detailContent').innerHTML = [
     '<div class="detail-top"><h2 class="detail-title">', escapeHtml(ticket.titulo), '</h2><span class="detail-date">', escapeHtml(ticket.data), '</span></div>',
     '<div class="detail-desc">', escapeHtml(ticket.descricao), '</div>',
-    '<div class="detail-meta"><span class="requester">Solicitado por: <strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong>', ticket.status === 'concluido' && ticket.concluido_por_nome ? '<span class="meta-separator">,</span> Concluído por <strong class="requester-name">' + escapeHtml(ticket.concluido_por_nome) + '</strong>' : '', '</span><span class="detail-status-wrap"><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span>', finishButton, '</span></div>'
+    '<div class="detail-meta"><span class="requester">Solicitado por <strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong>', ticket.status === 'concluido' && ticket.concluido_por_nome ? '<span class="meta-separator">,</span> Concluído por <strong class="requester-name">' + escapeHtml(ticket.concluido_por_nome) + '</strong>' : '', '</span><span class="detail-status-wrap"><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span>', finishButton, '</span></div>'
   ].join('');
 
   const finishTicketBtn = document.getElementById('finishTicketBtn');
