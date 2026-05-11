@@ -309,27 +309,30 @@ function syncSearchUi() {
 }
 
 function toggleSearch() {
-  searchOpen = !searchOpen;
-  syncSearchUi();
-
-  if (searchOpen) {
-    setTimeout(() => {
-      const filter = document.getElementById('searchFilter')?.value || 'titulo';
-
-      if (filter === 'status' || filter === 'destacado') {
-        document.getElementById('searchPresetSelect')?.focus();
-        return;
-      }
-
-      if (filter === 'data') {
-        document.getElementById('searchDateInput')?.focus();
-        return;
-      }
-
-      document.getElementById('searchInput')?.focus();
-    }, 120);
+  if (searchOpen || hasSearchValue()) {
+    clearSearchControls();
     return;
   }
+
+  searchOpen = true;
+  syncSearchUi();
+
+  setTimeout(() => {
+    const filter = document.getElementById('searchFilter')?.value || 'titulo';
+
+    if (filter === 'status' || filter === 'destacado') {
+      document.getElementById('searchPresetSelect')?.focus();
+      return;
+    }
+
+    if (filter === 'data') {
+      document.getElementById('searchDateInput')?.focus();
+      return;
+    }
+
+    document.getElementById('searchInput')?.focus();
+  }, 120);
+}
 
   clearSearchControls();
 }
