@@ -20,6 +20,8 @@ let realtimeClient = null;
 let realtimeChannel = null;
 let currentUser = null;
 let searchOpen = false;
+let searchPresetElement = null;
+let searchDateElement = null;
 
 function getStatusInfo(status) {
   return statuses.find((item) => item.codigo === status) || statuses[0];
@@ -83,9 +85,30 @@ function normalizeSearchValue(value) {
     .trim();
 }
 
+function getSearchTermByFilter(filter) {
+  if (filter === 'status') {
+    return document.getElementById('searchPresetSelect')?.value || '';
+  }
+
+  if (filter === 'data') {
+    return inputDateToBrDate(document.getElementById('searchDateInput')?.value || '');
+  }
+
+  if (filter === 'destacado') {
+    return 'true';
+  }
+
+  return document.getElementById('searchInput')?.value || '';
+}
+
 function getFilteredTickets() {
   const filter = document.getElementById('searchFilter')?.value || 'titulo';
-  const term = normalizeSearchValue(document.getElementById('searchInput')?.value || '');
+  const rawTerm = getSearchTermByFilter(filter);
+  const term = normalizeSearchValue(rawTerm);
+
+  if (filter === 'destacado') {
+    return tickets.filter((ticket) => Boolean(normalizeTicket(ticket).destacado));
+  }
 
   if (!term) return tickets;
 
@@ -96,23 +119,180 @@ function getFilteredTickets() {
     const searchMap = {
       titulo: normalized.titulo,
       solicitante: normalized.solicitante,
-      status: statusText,
-      data: normalized.data
+      status: normalized.status,
+      data: normalized.data,
+      status_nome: statusText
     };
+
+    if (filter === 'status') {
+      return normalized.status === rawTerm;
+    }
 
     return normalizeSearchValue(searchMap[filter] || '').includes(term);
   });
 }
 
-function syncSearchUi() {
-  const actions = document.querySelector('.search-actions');
+function ensureSearchFilterOptions() {
+  const filter = document.getElementById('searchFilter');
+  if (!filter) return;
+
+  const existingValues = Array.from(filter.options).map((option) => option.value);
+
+  const optionsToAdd = [
+    { value: 'data', label: 'Data' },
+    { value: 'destacado', label: 'Destacados' }
+  ];
+
+  optionsToAdd.forEach((item) => {
+    if (existingValues.includes(item.value)) return;
+
+    const option = document.createElement('option');
+    option.value = item.value;
+    option.textContent = item.label;
+    filter.appendChild(option);
+  });
+}
+
+function baseSearchFieldStyle(element) {
+  element.style.gridColumn = '2 / 3';
+  element.style.gridRow = '1';
+  element.style.width = '100%';
+  element.style.height = '40px';
+  element.style.minWidth = '0';
+  element.style.border = '1px solid var(--line)';
+  element.style.borderLeft = '0';
+  element.style.borderRadius = '0 10px 10px 0';
+  element.style.background = 'var(--surface)';
+  element.style.color = 'var(--text)';
+  element.style.padding = '0 12px';
+  element.style.outline = 'none';
+  element.style.font = 'inherit';
+  element.style.fontSize = '13px';
+}
+
+function ensureSearchPresetControls() {
   const box = document.getElementById('searchBox');
   const input = document.getElementById('searchInput');
 
-  if (!actions || !box || !input) return;
+  if (!box || !input) return;
+
+  if (!searchPresetElement) {
+    searchPresetElement = document.createElement('select');
+    searchPresetElement.id = 'searchPresetSelect';
+    searchPresetElement.setAttribute('aria-label', 'Valor do filtro');
+    baseSearchFieldStyle(searchPresetElement);
+    searchPresetElement.style.display = 'none';
+    box.appendChild(searchPresetElement);
+
+    searchPresetElement.addEventListener('change', () => {
+      searchOpen = true;
+      syncSearchUi();
+      render();
+    });
+  }
+
+  if (!searchDateElement) {
+    searchDateElement = document.createElement('input');
+    searchDateElement.id = 'searchDateInput';
+    searchDateElement.type = 'date';
+    searchDateElement.setAttribute('aria-label', 'Data do filtro');
+    baseSearchFieldStyle(searchDateElement);
+    searchDateElement.style.display = 'none';
+    box.appendChild(searchDateElement);
+
+    searchDateElement.addEventListener('input', () => {
+      searchOpen = true;
+      syncSearchUi();
+      render();
+    });
+
+    searchDateElement.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        clearSearchControls();
+      }
+    });
+  }
+}
+
+function renderSearchStatusOptions() {
+  if (!searchPresetElement) return;
+
+  searchPresetElement.innerHTML = statuses
+    .map((item) => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`)
+    .join('');
+}
+
+function renderSearchHighlightedOption() {
+  if (!searchPresetElement) return;
+
+  searchPresetElement.innerHTML = '<option value="true">Chamados destacados</option>';
+}
+
+function configureSearchMode() {
+  ensureSearchFilterOptions();
+  ensureSearchPresetControls();
+
+  const filter = document.getElementById('searchFilter')?.value || 'titulo';
+  const input = document.getElementById('searchInput');
+
+  if (!input || !searchPresetElement || !searchDateElement) return;
+
+  input.style.display = 'none';
+  searchPresetElement.style.display = 'none';
+  searchDateElement.style.display = 'none';
+
+  if (filter === 'status') {
+    renderSearchStatusOptions();
+    searchPresetElement.style.display = 'block';
+    return;
+  }
+
+  if (filter === 'destacado') {
+    renderSearchHighlightedOption();
+    searchPresetElement.style.display = 'block';
+    return;
+  }
+
+  if (filter === 'data') {
+    searchDateElement.style.display = 'block';
+    return;
+  }
+
+  input.style.display = 'block';
+}
+
+function hasSearchValue() {
+  const filter = document.getElementById('searchFilter')?.value || 'titulo';
+
+  if (filter === 'status') return Boolean(document.getElementById('searchPresetSelect')?.value);
+  if (filter === 'destacado') return true;
+  if (filter === 'data') return Boolean(document.getElementById('searchDateInput')?.value);
+
+  return Boolean(document.getElementById('searchInput')?.value.trim());
+}
+
+function clearSearchControls() {
+  const input = document.getElementById('searchInput');
+  const dateInput = document.getElementById('searchDateInput');
+
+  if (input) input.value = '';
+  if (dateInput) dateInput.value = '';
+
+  searchOpen = false;
+  syncSearchUi();
+  render();
+}
+
+function syncSearchUi() {
+  const actions = document.querySelector('.search-actions');
+  const box = document.getElementById('searchBox');
+
+  if (!actions || !box) return;
+
+  configureSearchMode();
 
   actions.classList.toggle('is-open', searchOpen);
-  box.classList.toggle('has-value', Boolean(input.value.trim()));
+  box.classList.toggle('has-value', hasSearchValue());
 }
 
 function toggleSearch() {
@@ -120,14 +300,25 @@ function toggleSearch() {
   syncSearchUi();
 
   if (searchOpen) {
-    setTimeout(() => document.getElementById('searchInput').focus(), 120);
+    setTimeout(() => {
+      const filter = document.getElementById('searchFilter')?.value || 'titulo';
+
+      if (filter === 'status' || filter === 'destacado') {
+        document.getElementById('searchPresetSelect')?.focus();
+        return;
+      }
+
+      if (filter === 'data') {
+        document.getElementById('searchDateInput')?.focus();
+        return;
+      }
+
+      document.getElementById('searchInput')?.focus();
+    }, 120);
     return;
   }
 
-  const input = document.getElementById('searchInput');
-  input.value = '';
-  render();
-  syncSearchUi();
+  clearSearchControls();
 }
 
 function sanitizeText(value, maxLength) {
@@ -1283,7 +1474,8 @@ function runTests() {
 document.addEventListener('DOMContentLoaded', async () => {
   await requireSession();
 
-  await loadStatuses();
+await loadStatuses();
+configureSearchMode();
 
   tickets = loadCachedTickets();
   sortTickets();
@@ -1339,22 +1531,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     render();
   });
 
-  document.getElementById('searchFilter').addEventListener('change', () => {
-    searchOpen = true;
-    syncSearchUi();
-    render();
-    document.getElementById('searchInput').focus();
-  });
+document.getElementById('searchFilter').addEventListener('change', () => {
+  searchOpen = true;
+  configureSearchMode();
+  syncSearchUi();
+  render();
 
-  document.getElementById('searchInput').addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      document.getElementById('searchInput').value = '';
-      searchOpen = false;
-      syncSearchUi();
-      render();
-    }
-  });
+  const filter = document.getElementById('searchFilter').value;
 
+  if (filter === 'status' || filter === 'destacado') {
+    document.getElementById('searchPresetSelect')?.focus();
+    return;
+  }
+
+  if (filter === 'data') {
+    document.getElementById('searchDateInput')?.focus();
+    return;
+  }
+
+  document.getElementById('searchInput').focus();
+});
+
+document.getElementById('searchInput').addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    clearSearchControls();
+  }
+});
+  
   document.getElementById('statusManagerBtn').addEventListener('click', openStatusManager);
   document.getElementById('cancelStatusManagerBtn').addEventListener('click', closeStatusManager);
   document.getElementById('listStatusesBtn').addEventListener('click', openStatusList);
@@ -1454,10 +1657,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeTicketExport();
       closeUserManage();
       closeUserDeleteConfirm();
-      searchOpen = false;
-      const searchInput = document.getElementById('searchInput');
-      if (searchInput) searchInput.value = '';
-      syncSearchUi();
+clearSearchControls();
     }
   });
 
