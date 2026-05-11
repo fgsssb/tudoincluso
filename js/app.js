@@ -527,7 +527,8 @@ function openDetail(id) {
 
   selectedTicketId = id;
   const statusInfo = getStatusInfo(ticket.status);
-  const finishButton = ticket.status === 'andamento' || ticket.status === 'suporte'
+
+  const finishButton = ['andamento', 'suporte', 'pendente'].includes(ticket.status)
     ? '<button class="finish-btn" id="finishTicketBtn" type="button" title="Finalizar chamado" aria-label="Finalizar chamado"></button>'
     : '';
 
@@ -585,10 +586,12 @@ function openContextMenu(event, id) {
   if (!ticket) return;
 
   selectedTicketId = id;
+
   document.getElementById('changeStatusBtn').classList.toggle(
     'is-hidden',
     !['pendente', 'suporte', 'andamento'].includes(ticket.status)
   );
+
   document.getElementById('toggleHighlightBtn').textContent = ticket.destacado ? 'Remover destaque' : 'Destacar chamado';
 
   const menu = document.getElementById('contextMenu');
