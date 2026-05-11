@@ -217,9 +217,22 @@ function ensureSearchPresetControls() {
 function renderSearchStatusOptions() {
   if (!searchPresetElement) return;
 
+  const selectedValue = searchPresetElement.value;
+
   searchPresetElement.innerHTML = statuses
     .map((item) => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`)
     .join('');
+
+  const stillExists = statuses.some((item) => item.codigo === selectedValue);
+
+  if (selectedValue && stillExists) {
+    searchPresetElement.value = selectedValue;
+    return;
+  }
+
+  if (statuses.length) {
+    searchPresetElement.value = statuses[0].codigo;
+  }
 }
 
 function renderSearchHighlightedOption() {
