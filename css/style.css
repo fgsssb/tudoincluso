@@ -86,7 +86,6 @@ body {
   box-shadow: 0 8px 22px rgba(0, 0, 0, .16), inset 0 1px 0 rgba(255, 255, 255, .035);
 }
 
-
 .user-menu {
   position: relative;
   display: inline-flex;
@@ -396,24 +395,29 @@ button {
   position: relative;
   z-index: 1;
   padding: 11px;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-auto-rows: auto;
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: unset !important;
+  grid-auto-rows: unset !important;
+  align-content: unset !important;
   gap: 10px;
   flex: 1;
   min-height: 0;
-  align-content: start;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
 .card {
   position: relative;
-  overflow: hidden;
+  display: block !important;
+  height: auto !important;
+  min-height: 76px !important;
+  max-height: none !important;
+  overflow: visible !important;
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 12px 48px 12px 12px;
+  padding: 14px 52px 14px 14px !important;
   animation: cardIn .34s ease both;
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
@@ -460,26 +464,30 @@ button {
 }
 
 .card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 12px;
-  margin-bottom: 8px;
-  padding-right: 92px;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  margin-bottom: 8px !important;
+  padding-right: 92px !important;
+  min-height: 18px !important;
 }
 
 .card-title {
-  margin: 0;
+  margin: 0 !important;
   font-size: 14px;
-  line-height: 1.25;
+  line-height: 1.25 !important;
   font-weight: 700;
-  word-break: break-word;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  word-break: break-word !important;
 }
 
 .card-date {
-  position: absolute;
-  right: 14px;
-  top: 13px;
+  position: absolute !important;
+  right: 14px !important;
+  top: 14px !important;
   color: var(--muted);
   font-size: 12px;
   white-space: nowrap;
@@ -487,9 +495,9 @@ button {
 }
 
 .card-open-hint {
-  position: absolute;
-  right: 14px;
-  top: 50%;
+  position: absolute !important;
+  right: 14px !important;
+  top: 50% !important;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -497,7 +505,7 @@ button {
   height: 22px;
   color: var(--muted);
   opacity: .78;
-  transform: translateY(-50%);
+  transform: translateY(-50%) !important;
 }
 
 .card-open-hint::after {
@@ -528,16 +536,19 @@ button {
 }
 
 .meta {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
   color: var(--muted);
   font-size: 12px;
-  line-height: 1.35;
-  flex-wrap: wrap;
-  margin-top: 6px;
-  padding-bottom: 1px;
+  line-height: 1.35 !important;
+  flex-wrap: wrap !important;
+  margin-top: 6px !important;
+  padding-bottom: 1px !important;
+  min-height: 18px !important;
+  overflow: visible !important;
+  white-space: normal !important;
 }
 
 .requester {
@@ -558,6 +569,13 @@ button {
 .meta-separator {
   color: var(--muted);
   margin-left: -2px;
+}
+
+.requester,
+.requester-name,
+.status {
+  line-height: 1.35 !important;
+  white-space: normal !important;
 }
 
 .status {
@@ -931,9 +949,6 @@ textarea {
   }
 }
 
-
-
-
 .search-actions {
   display: inline-flex;
   align-items: center;
@@ -1061,7 +1076,6 @@ textarea {
     width: 100%;
   }
 }
-
 
 .status-manager-btn {
   position: relative;
@@ -1330,7 +1344,6 @@ textarea {
   }
 }
 
-
 .admin-panel-btn {
   position: relative;
   overflow: hidden;
@@ -1392,10 +1405,9 @@ textarea {
   width: min(520px, 100%);
 }
 
-
 .admin-options {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
@@ -1441,6 +1453,13 @@ textarea {
   font-weight: 900;
   font-size: 14px;
   filter: grayscale(1);
+}
+
+.admin-option-icon.tickets::before {
+  content: '▦';
+  color: var(--blue);
+  font-weight: 900;
+  font-size: 17px;
 }
 
 .admin-option-info {
@@ -1542,18 +1561,6 @@ textarea {
   pointer-events: none;
 }
 
-
-.admin-options {
-  grid-template-columns: 1fr 1fr;
-}
-
-.admin-option-icon.tickets::before {
-  content: '▦';
-  color: var(--blue);
-  font-weight: 900;
-  font-size: 17px;
-}
-
 .ticket-export-modal {
   width: min(620px, 100%);
 }
@@ -1604,12 +1611,6 @@ textarea {
   box-shadow: 0 0 0 3px rgba(110, 168, 255, .055);
 }
 
-@media (max-width: 760px) {
-  .admin-options,
-  .date-range-grid {
-    grid-template-columns: 1fr;
-  }
-}
 .status-line {
   display: inline-flex;
   align-items: baseline;
@@ -1620,4 +1621,11 @@ textarea {
 .status-normal {
   color: var(--muted);
   font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .admin-options,
+  .date-range-grid {
+    grid-template-columns: 1fr;
+  }
 }
