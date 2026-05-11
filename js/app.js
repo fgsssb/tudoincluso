@@ -309,8 +309,17 @@ function syncSearchUi() {
 }
 
 function toggleSearch() {
-  if (searchOpen || hasSearchValue()) {
-    clearSearchControls();
+  const input = document.getElementById('searchInput');
+
+  if (searchOpen) {
+    searchOpen = false;
+
+    if (input) {
+      input.value = '';
+    }
+
+    syncSearchUi();
+    render();
     return;
   }
 
@@ -330,7 +339,7 @@ function toggleSearch() {
       return;
     }
 
-    document.getElementById('searchInput')?.focus();
+    input?.focus();
   }, 120);
 }
 
@@ -1673,7 +1682,16 @@ document.getElementById('searchInput').addEventListener('keydown', (event) => {
       closeTicketExport();
       closeUserManage();
       closeUserDeleteConfirm();
-clearSearchControls();
+searchOpen = false;
+
+const searchInput = document.getElementById('searchInput');
+if (searchInput) searchInput.value = '';
+
+const searchDateInput = document.getElementById('searchDateInput');
+if (searchDateInput) searchDateInput.value = '';
+
+syncSearchUi();
+render();
     }
   });
 
