@@ -130,7 +130,6 @@ function toggleSearch() {
   syncSearchUi();
 }
 
-
 function sanitizeText(value, maxLength) {
   return String(value || '')
     .replace(/[\u0000-\u001F\u007F]/g, '')
@@ -331,7 +330,7 @@ async function loadStatuses() {
     }
 
     renderStatusOptions('newStatus', 'concluido');
-    renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
+    renderStatusOptions('statusChangeSelect', 'andamento');
   } catch {
     notify('Não foi possível carregar a lista de status.');
   }
@@ -420,7 +419,7 @@ async function addCustomStatus() {
     }
 
     renderStatusOptions('newStatus', data.status?.codigo || 'concluido');
-    renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
+    renderStatusOptions('statusChangeSelect', 'andamento');
     renderStatusRemoveList();
     render();
     document.getElementById('newStatusName').value = '';
@@ -463,7 +462,7 @@ async function confirmRemoveStatus() {
     }
 
     renderStatusOptions('newStatus', 'concluido');
-    renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
+    renderStatusOptions('statusChangeSelect', 'andamento');
     renderStatusRemoveList();
     render();
     closeStatusDeleteConfirm();
@@ -586,7 +585,10 @@ function openContextMenu(event, id) {
   if (!ticket) return;
 
   selectedTicketId = id;
-  document.getElementById('changeStatusBtn').classList.toggle('is-hidden', ticket.status !== 'pendente');
+  document.getElementById('changeStatusBtn').classList.toggle(
+    'is-hidden',
+    !['pendente', 'suporte', 'andamento'].includes(ticket.status)
+  );
   document.getElementById('toggleHighlightBtn').textContent = ticket.destacado ? 'Remover destaque' : 'Destacar chamado';
 
   const menu = document.getElementById('contextMenu');
@@ -646,9 +648,13 @@ async function confirmDeleteTicket() {
 
 function openStatusChangeModal() {
   const ticket = getSelectedTicket();
-  if (!ticket || ticket.status !== 'pendente') return;
+  if (!ticket || !['pendente', 'suporte', 'andamento'].includes(ticket.status)) return;
 
-  renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
+  const defaultStatus = ticket.status === 'andamento'
+    ? 'pendente'
+    : 'andamento';
+
+  renderStatusOptions('statusChangeSelect', defaultStatus, { exclude: [ticket.status] });
 
   closeContextMenu();
   openBackdrop('statusChangeBackdrop');
@@ -657,16 +663,16 @@ function openStatusChangeModal() {
 
 function closeStatusChangeModal() {
   closeBackdrop('statusChangeBackdrop');
-  renderStatusOptions('statusChangeSelect', 'andamento', { exclude: ['pendente'] });
+  renderStatusOptions('statusChangeSelect', 'andamento');
 }
 
 async function saveStatusChange() {
   const ticket = getSelectedTicket();
-  if (!ticket || ticket.status !== 'pendente') return;
+  if (!ticket || !['pendente', 'suporte', 'andamento'].includes(ticket.status)) return;
 
   const status = document.getElementById('statusChangeSelect').value;
 
-  if (!isValidStatus(status) || status === 'pendente') {
+  if (!isValidStatus(status) || status === ticket.status) {
     notify('Status inválido.');
     return;
   }
@@ -675,7 +681,6 @@ async function saveStatusChange() {
   const ok = await updateTicket(ticket.id, { status }, `Status alterado para ${info.nome}.`);
   if (ok) closeStatusChangeModal();
 }
-
 
 async function toggleSelectedHighlight() {
   const ticket = getSelectedTicket();
@@ -771,7 +776,6 @@ async function saveEditedDescription() {
   const ok = await updateTicket(ticket.id, { descricao: value }, 'Descrição atualizada.');
   if (ok) closeEditDescriptionModal();
 }
-
 
 function openEditDateModal() {
   const ticket = getSelectedTicket();
@@ -1248,7 +1252,6 @@ function handleGlobalHotkeys(event) {
   }
 }
 
-
 function runTests() {
   console.assert(getStatusInfo('suporte').nome === 'Aguardando suporte', 'Teste status suporte falhou');
   console.assert(getStatusInfo('pendente').nome === 'Pendente - Conferir descrição', 'Teste status pendente falhou');
@@ -1262,10 +1265,12 @@ function runTests() {
   console.assert(getStatusPriority('andamento') < getStatusPriority('concluido'), 'Teste prioridade andamento falhou');
   console.assert(getStatusStyle('concluido').includes('#39d98a'), 'Teste cor status falhou');
   console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
+
   const originalUserForAdminRoleTest = currentUser;
   currentUser = { role: 'Admin' };
   console.assert(isAdminUser() === true, 'Teste admin role falhou');
   currentUser = originalUserForAdminRoleTest;
+
   console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
   console.assert(brDateToInputDate('09/05/2026') === '2026-05-09', 'Teste data BR falhou');
   console.assert(isTypingTarget(document.createElement('input')) === true, 'Teste hotkey typing target falhou');
@@ -1319,7 +1324,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!btn) return;
     askRemoveUser(btn.dataset.userId);
   });
-
 
   document.getElementById('searchBtn').addEventListener('click', (event) => {
     event.stopPropagation();
