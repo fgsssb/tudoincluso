@@ -214,7 +214,6 @@ function ensureSearchPresetControls() {
     });
   }
 }
-
 function renderSearchStatusOptions() {
   if (!searchPresetElement) return;
 
@@ -453,7 +452,6 @@ function upsertTicket(ticket, markNew = false) {
     }, 1400);
   }
 }
-
 function removeTicket(id) {
   const before = tickets.length;
   tickets = tickets.filter((ticket) => ticket.id !== id);
@@ -712,4 +710,997 @@ async function addTicket() {
   const data = new Date().toLocaleDateString('pt-BR');
 
   if (!titulo || !descricao) return notify('Preencha título e descrição.');
- 
+  if (!isValidStatus(status)) return notify('Status inválido.');
+
+  try {
+    const result = await apiRequest('/api/tickets', {
+      method: 'POST',
+      body: JSON.stringify({ titulo, descricao, solicitante, status, data })
+    });
+
+    upsertTicket(result.ticket, true);
+    closeModal();
+    notify('Chamado adicionado.');
+  } catch (error) {
+    notify(error.message || 'Erro ao adicionar chamado.');
+  }
+}
+function openDetail(id) {
+  const ticket = getTicketById(id);
+  if (!ticket) return;
+
+  selectedTicketId = id;
+  const statusInfo = getStatusInfo(ticket.status);
+
+  const finishButton = ['andamento', 'suporte', 'pendente'].includes(ticket.status)
+    ? '<button class="finish-btn" id="finishTicketBtn" type="button" title="Finalizar chamado" aria-label="Finalizar chamado"></button>'
+    : '';
+
+  document.getElementById('detailContent').innerHTML = [
+    '<div class="detail-top"><h2 class="detail-title">', escapeHtml(ticket.titulo), '</h2><span class="detail-date">', escapeHtml(ticket.data), '</span></div>',
+    '<div class="detail-desc">', escapeHtml(ticket.descricao), '</div>',
+    '<div class="detail-meta"><span class="requester">Solicitado por <strong class="requester-name">', escapeHtml(ticket.solicitante), '</strong>', ticket.status === 'concluido' && ticket.concluido_por_nome ? '<span class="meta-separator">,</span> Concluído por <strong class="requester-name">' + escapeHtml(ticket.concluido_por_nome) + '</strong>' : '', '</span><span class="detail-status-wrap"><span class="status" ', getStatusStyle(ticket.status), '>', escapeHtml(statusInfo.nome), '</span>', finishButton, '</span></div>'
+  ].join('');
+
+  const finishTicketBtn = document.getElementById('finishTicketBtn');
+  if (finishTicketBtn) finishTicketBtn.addEventListener('click', (event) => finishTicket(event, id));
+
+  const detailBackdrop = document.getElementById('detailBackdrop');
+  detailBackdrop.classList.remove('is-closing');
+  detailBackdrop.classList.add('is-open');
+}
+
+function closeDetail() {
+  const detailBackdrop = document.getElementById('detailBackdrop');
+  if (!detailBackdrop.classList.contains('is-open')) return;
+
+  detailBackdrop.classList.remove('is-open');
+  detailBackdrop.classList.add('is-closing');
+  clearTimeout(detailCloseTimer);
+  detailCloseTimer = setTimeout(() => detailBackdrop.classList.remove('is-closing'), 250);
+}
+
+async function updateTicket(id, patch, successMessage) {
+  try {
+    const result = await apiRequest('/api/tickets', {
+      method: 'PATCH',
+      body: JSON.stringify({ id, ...patch })
+    });
+
+    upsertTicket(result.ticket, true);
+    if (successMessage) notify(successMessage);
+    return true;
+  } catch (error) {
+    notify(error.message || 'Erro ao atualizar chamado.');
+    return false;
+  }
+}
+
+async function finishTicket(event, id) {
+  event.stopPropagation();
+  const ok = await updateTicket(id, { status: 'concluido' }, 'Chamado finalizado como concluído.');
+  if (ok) closeDetail();
+}
+
+function openContextMenu(event, id) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const ticket = getTicketById(id);
+  if (!ticket) return;
+
+  selectedTicketId = id;
+
+  document.getElementById('changeStatusBtn').classList.toggle(
+    'is-hidden',
+    !['pendente', 'suporte', 'andamento'].includes(ticket.status)
+  );
+
+  document.getElementById('toggleHighlightBtn').textContent = ticket.destacado ? 'Remover destaque' : 'Destacar chamado';
+
+  const menu = document.getElementById('contextMenu');
+  menu.style.left = event.clientX + 'px';
+  menu.style.top = event.clientY + 'px';
+  menu.classList.add('is-open');
+
+  const rect = menu.getBoundingClientRect();
+  const padding = 10;
+
+  if (rect.right > window.innerWidth - padding) {
+    menu.style.left = (window.innerWidth - rect.width - padding) + 'px';
+  }
+
+  if (rect.bottom > window.innerHeight - padding) {
+    menu.style.top = (window.innerHeight - rect.height - padding) + 'px';
+  }
+}
+
+function closeContextMenu() {
+  document.getElementById('contextMenu').classList.remove('is-open');
+}
+
+function getSelectedTicket() {
+  return selectedTicketId ? getTicketById(selectedTicketId) : null;
+}
+
+function deleteSelectedTicket() {
+  if (!getSelectedTicket()) return;
+  closeContextMenu();
+  openBackdrop('deleteConfirmBackdrop');
+}
+
+function closeDeleteConfirm() {
+  closeBackdrop('deleteConfirmBackdrop');
+}
+
+async function confirmDeleteTicket() {
+  const selected = getSelectedTicket();
+  if (!selected) return;
+
+  try {
+    await apiRequest('/api/tickets', {
+      method: 'DELETE',
+      body: JSON.stringify({ id: selected.id })
+    });
+
+    removeTicket(selected.id);
+    selectedTicketId = null;
+    closeDeleteConfirm();
+    closeDetail();
+    notify('Chamado excluído.');
+  } catch (error) {
+    notify(error.message || 'Erro ao excluir chamado.');
+  }
+}
+
+function openStatusChangeModal() {
+  const ticket = getSelectedTicket();
+  if (!ticket || !['pendente', 'suporte', 'andamento'].includes(ticket.status)) return;
+
+  const defaultStatus = ticket.status === 'andamento'
+    ? 'pendente'
+    : 'andamento';
+
+  renderStatusOptions('statusChangeSelect', defaultStatus, { exclude: [ticket.status] });
+
+  closeContextMenu();
+  openBackdrop('statusChangeBackdrop');
+  setTimeout(() => document.getElementById('statusChangeSelect').focus(), 120);
+}
+
+function closeStatusChangeModal() {
+  closeBackdrop('statusChangeBackdrop');
+  renderStatusOptions('statusChangeSelect', 'andamento');
+}
+
+async function saveStatusChange() {
+  const ticket = getSelectedTicket();
+  if (!ticket || !['pendente', 'suporte', 'andamento'].includes(ticket.status)) return;
+
+  const status = document.getElementById('statusChangeSelect').value;
+
+  if (!isValidStatus(status) || status === ticket.status) {
+    notify('Status inválido.');
+    return;
+  }
+
+  const info = getStatusInfo(status);
+  const ok = await updateTicket(ticket.id, { status }, `Status alterado para ${info.nome}.`);
+  if (ok) closeStatusChangeModal();
+}
+
+async function toggleSelectedHighlight() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const destacado = !ticket.destacado;
+  const ok = await updateTicket(
+    ticket.id,
+    { destacado },
+    destacado ? 'Chamado destacado.' : 'Destaque removido.'
+  );
+
+  if (ok) closeContextMenu();
+}
+
+function openEditTitleModal() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const input = document.getElementById('editTitleInput');
+  input.value = ticket.titulo;
+  closeContextMenu();
+  openBackdrop('editTitleBackdrop');
+  setTimeout(() => { input.focus(); input.select(); }, 120);
+}
+
+function closeEditTitleModal() {
+  closeBackdrop('editTitleBackdrop');
+  document.getElementById('editTitleInput').value = '';
+}
+
+async function saveEditedTitle() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const value = sanitizeText(document.getElementById('editTitleInput').value, LIMITS.title);
+  if (!value) return notify('Informe um título.');
+
+  const ok = await updateTicket(ticket.id, { titulo: value }, 'Título atualizado.');
+  if (ok) closeEditTitleModal();
+}
+
+function openEditRequesterModal() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const input = document.getElementById('editRequesterInput');
+  input.value = ticket.solicitante;
+  closeContextMenu();
+  openBackdrop('editRequesterBackdrop');
+  setTimeout(() => { input.focus(); input.select(); }, 120);
+}
+
+function closeEditRequesterModal() {
+  closeBackdrop('editRequesterBackdrop');
+  document.getElementById('editRequesterInput').value = '';
+}
+
+async function saveEditedRequester() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const value = sanitizeText(document.getElementById('editRequesterInput').value, LIMITS.requester);
+  if (!value) return notify('Informe o solicitante.');
+
+  const ok = await updateTicket(ticket.id, { solicitante: value }, 'Solicitante atualizado.');
+  if (ok) closeEditRequesterModal();
+}
+
+function openEditDescriptionModal() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const input = document.getElementById('editDescriptionInput');
+  input.value = ticket.descricao;
+  closeContextMenu();
+  openBackdrop('editDescriptionBackdrop');
+  setTimeout(() => { input.focus(); input.select(); }, 120);
+}
+
+function closeEditDescriptionModal() {
+  closeBackdrop('editDescriptionBackdrop');
+  document.getElementById('editDescriptionInput').value = '';
+}
+
+async function saveEditedDescription() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const value = sanitizeDescription(document.getElementById('editDescriptionInput').value);
+  if (!value) return notify('Informe a descrição.');
+
+  const ok = await updateTicket(ticket.id, { descricao: value }, 'Descrição atualizada.');
+  if (ok) closeEditDescriptionModal();
+}
+
+function openEditDateModal() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const input = document.getElementById('editDateInput');
+  input.value = brDateToInputDate(ticket.data) || new Date().toISOString().slice(0, 10);
+  closeContextMenu();
+  openBackdrop('editDateBackdrop');
+  setTimeout(() => { input.focus(); input.showPicker?.(); }, 120);
+}
+
+function closeEditDateModal() {
+  closeBackdrop('editDateBackdrop');
+  document.getElementById('editDateInput').value = '';
+}
+
+async function saveEditedDate() {
+  const ticket = getSelectedTicket();
+  if (!ticket) return;
+
+  const value = inputDateToBrDate(document.getElementById('editDateInput').value);
+  if (!value) return notify('Informe uma data válida.');
+
+  const ok = await updateTicket(ticket.id, { data: value }, 'Data atualizada.');
+  if (ok) closeEditDateModal();
+}
+
+function addBackdropClose(id, closeFn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.addEventListener('click', (event) => {
+    if (event.target.id === id) closeFn();
+  });
+}
+
+function openTicketExport() {
+  if (!isAdminUser()) {
+    notify('Acesso restrito ao administrador.');
+    return;
+  }
+
+  renderExportStatusOptions();
+  closeAdminPanel();
+  openBackdrop('ticketExportBackdrop');
+}
+
+function closeTicketExport() {
+  closeBackdrop('ticketExportBackdrop');
+  document.getElementById('exportStartDate').value = '';
+  document.getElementById('exportEndDate').value = '';
+  document.getElementById('exportStatusFilter').value = '';
+  document.getElementById('exportRequesterFilter').value = '';
+}
+
+function renderExportStatusOptions() {
+  const select = document.getElementById('exportStatusFilter');
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Todos os status</option>' + statuses
+    .map((item) => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`)
+    .join('');
+}
+
+function csvEscape(value) {
+  const text = String(value ?? '');
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+
+function getTicketDateComparable(ticket) {
+  const inputDate = brDateToInputDate(ticket.data);
+  return inputDate || '';
+}
+
+function getTicketsForExport(useFilters) {
+  if (!useFilters) return [...tickets];
+
+  const start = document.getElementById('exportStartDate').value;
+  const end = document.getElementById('exportEndDate').value;
+  const status = document.getElementById('exportStatusFilter').value;
+  const requester = normalizeSearchValue(document.getElementById('exportRequesterFilter').value);
+
+  return tickets.filter((ticket) => {
+    const normalized = normalizeTicket(ticket);
+    const ticketDate = getTicketDateComparable(normalized);
+
+    if (start && ticketDate && ticketDate < start) return false;
+    if (end && ticketDate && ticketDate > end) return false;
+    if ((start || end) && !ticketDate) return false;
+    if (status && normalized.status !== status) return false;
+    if (requester && !normalizeSearchValue(normalized.solicitante).includes(requester)) return false;
+
+    return true;
+  });
+}
+
+function ticketsToCsv(rows) {
+  const headers = [
+    'id',
+    'titulo',
+    'descricao',
+    'solicitante',
+    'status_codigo',
+    'status_nome',
+    'data',
+    'concluido_por',
+    'destacado',
+    'criado_em',
+    'atualizado_em'
+  ];
+
+  const csvRows = rows.map((ticket) => {
+    const normalized = normalizeTicket(ticket);
+    const statusInfo = getStatusInfo(normalized.status);
+
+    const values = {
+      id: normalized.id,
+      titulo: normalized.titulo,
+      descricao: normalized.descricao,
+      solicitante: normalized.solicitante,
+      status_codigo: normalized.status,
+      status_nome: statusInfo.nome,
+      data: normalized.data,
+      concluido_por: normalized.concluido_por_nome || '',
+      destacado: normalized.destacado ? 'sim' : 'não',
+      criado_em: normalized.criado_em || '',
+      atualizado_em: normalized.atualizado_em || ''
+    };
+
+    return headers.map((key) => csvEscape(values[key])).join(',');
+  });
+
+  return '\ufeff' + headers.map(csvEscape).join(',') + '\n' + csvRows.join('\n');
+}
+
+function getExportFileName(useFilters) {
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, '0');
+  const stamp = [now.getFullYear(), pad(now.getMonth() + 1), pad(now.getDate())].join('-');
+  return useFilters ? `chamados-filtrados-${stamp}.csv` : `chamados-todos-${stamp}.csv`;
+}
+
+async function downloadCsv(rows, useFilters) {
+  if (!rows.length) {
+    notify('Nenhum chamado encontrado para exportar.');
+    return;
+  }
+
+  const blob = new Blob([ticketsToCsv(rows)], { type: 'text/csv;charset=utf-8' });
+  const fileName = getExportFileName(useFilters);
+
+  try {
+    if ('showSaveFilePicker' in window) {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [
+          {
+            description: 'Arquivo CSV',
+            accept: { 'text/csv': ['.csv'] }
+          }
+        ]
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    } else {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    notify('CSV exportado.');
+  } catch (error) {
+    if (error && error.name === 'AbortError') return;
+    notify('Não foi possível exportar o CSV.');
+  }
+}
+
+async function exportTickets(useFilters) {
+  if (!isAdminUser()) {
+    notify('Acesso restrito ao administrador.');
+    return;
+  }
+
+  await loadTicketsFromServer();
+  await downloadCsv(getTicketsForExport(useFilters), useFilters);
+}
+
+let adminUsers = [];
+let pendingUserDeleteId = null;
+
+async function apiAdminRequest(options = {}) {
+  return apiRequest('/api/admin', options);
+}
+
+async function loadAdminUsers() {
+  if (!isAdminUser()) return;
+
+  try {
+    const data = await apiAdminRequest({ method: 'GET' });
+    adminUsers = Array.isArray(data.users) ? data.users : [];
+    renderAdminUsers();
+  } catch (error) {
+    notify(error.message || 'Erro ao carregar usuários.');
+  }
+}
+
+function renderAdminUsers() {
+  const list = document.getElementById('userRemoveList');
+  if (!list) return;
+
+  list.innerHTML = adminUsers.length
+    ? adminUsers.map((user) => [
+      '<div class="user-remove-item">',
+        '<span class="user-remove-left">',
+          '<span class="user-remove-name">', escapeHtml(user.nome || user.login), '</span>',
+          '<span class="user-remove-meta">', escapeHtml(user.login), ' · ', escapeHtml(user.role || 'ti'), '</span>',
+        '</span>',
+        '<button class="user-remove-btn" type="button" data-user-id="', escapeHtml(user.id), '" ', user.id === currentUser?.id ? 'disabled title="Você não pode remover sua própria conta"' : 'title="Remover usuário"', '>×</button>',
+      '</div>'
+    ].join('')).join('')
+    : '<div class="empty">Nenhum usuário encontrado.</div>';
+}
+
+function openUserManage() {
+  if (!isAdminUser()) {
+    notify('Acesso restrito ao administrador.');
+    return;
+  }
+
+  closeAdminPanel();
+  openBackdrop('userManageBackdrop');
+  loadAdminUsers();
+  setTimeout(() => document.getElementById('newUserLogin').focus(), 120);
+}
+
+function closeUserManage() {
+  closeBackdrop('userManageBackdrop');
+  document.getElementById('newUserLogin').value = '';
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserPassword').value = '';
+  document.getElementById('newUserRole').value = 'ti';
+}
+
+async function createAdminUser() {
+  if (!isAdminUser()) return notify('Acesso restrito ao administrador.');
+
+  const login = sanitizeText(document.getElementById('newUserLogin').value, 40).toLowerCase();
+  const nome = sanitizeText(document.getElementById('newUserName').value, 60);
+  const senha = String(document.getElementById('newUserPassword').value || '').slice(0, 80);
+  const role = document.getElementById('newUserRole').value;
+
+  if (!login || login.length < 3) return notify('Usuário/login precisa ter pelo menos 3 caracteres.');
+  if (!senha || senha.length < 6) return notify('Senha precisa ter pelo menos 6 caracteres.');
+
+  try {
+    const data = await apiAdminRequest({
+      method: 'POST',
+      body: JSON.stringify({ login, nome: nome || login, senha, role })
+    });
+
+    const existingIndex = adminUsers.findIndex((user) => user.id === data.user.id);
+
+    if (existingIndex >= 0) {
+      adminUsers[existingIndex] = data.user;
+    } else {
+      adminUsers.push(data.user);
+    }
+
+    adminUsers.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || '')));
+    renderAdminUsers();
+
+    document.getElementById('newUserLogin').value = '';
+    document.getElementById('newUserName').value = '';
+    document.getElementById('newUserPassword').value = '';
+    document.getElementById('newUserRole').value = 'ti';
+
+    notify('Usuário criado.');
+  } catch (error) {
+    notify(error.message || 'Erro ao criar usuário.');
+  }
+}
+
+function askRemoveUser(id) {
+  const user = adminUsers.find((item) => item.id === id);
+  if (!user) return;
+  if (user.id === currentUser?.id) return notify('Você não pode remover sua própria conta.');
+
+  pendingUserDeleteId = id;
+  document.getElementById('userDeleteConfirmText').textContent =
+    `Tem certeza que deseja remover o usuário "${user.nome || user.login}"?`;
+  openBackdrop('userDeleteConfirmBackdrop');
+}
+
+function closeUserDeleteConfirm() {
+  closeBackdrop('userDeleteConfirmBackdrop');
+  pendingUserDeleteId = null;
+}
+
+async function confirmRemoveUser() {
+  if (!pendingUserDeleteId) return;
+
+  try {
+    await apiAdminRequest({
+      method: 'DELETE',
+      body: JSON.stringify({ id: pendingUserDeleteId })
+    });
+
+    adminUsers = adminUsers.filter((user) => user.id !== pendingUserDeleteId);
+    renderAdminUsers();
+    closeUserDeleteConfirm();
+    notify('Usuário removido.');
+  } catch (error) {
+    notify(error.message || 'Erro ao remover usuário.');
+  }
+}
+
+function isAdminUser() {
+  const role = String(currentUser?.role || '').toLowerCase();
+  return role === 'admin';
+}
+
+function syncAdminUi() {
+  const btn = document.getElementById('adminPanelBtn');
+  if (!btn) return;
+
+  btn.classList.toggle('is-hidden', !isAdminUser());
+}
+
+function openAdminPanel() {
+  if (!isAdminUser()) {
+    notify('Acesso restrito ao administrador.');
+    return;
+  }
+
+  openBackdrop('adminPanelBackdrop');
+}
+
+function closeAdminPanel() {
+  closeBackdrop('adminPanelBackdrop');
+}
+
+async function requireSession() {
+  const res = await fetch('/api/session', { credentials: 'same-origin' });
+
+  if (!res.ok) {
+    window.location.href = LOGIN_URL;
+    return null;
+  }
+
+  const data = await res.json();
+  currentUser = data.user;
+  document.getElementById('userName').textContent = currentUser.nome || currentUser.login || 'TI';
+  syncAdminUi();
+
+  return currentUser;
+}
+
+async function setupRealtime() {
+  const response = await fetch('/api/config', { credentials: 'same-origin' });
+
+  if (!response.ok) {
+    notify('Realtime indisponível.');
+    return;
+  }
+
+  const config = await response.json();
+
+  if (!window.supabase) {
+    notify('Biblioteca Supabase não carregou.');
+    return;
+  }
+
+  realtimeClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+  realtimeChannel = realtimeClient
+    .channel('pj1-tickets-channel')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pj1_tickets' }, (payload) => {
+      if (payload.eventType === 'DELETE') {
+        removeTicket(payload.old.id);
+        return;
+      }
+
+      if (payload.new && payload.new.deletado === true) {
+        removeTicket(payload.new.id);
+        return;
+      }
+
+      if (payload.new) {
+        upsertTicket(payload.new, true);
+      }
+    })
+    .subscribe();
+}
+
+function toggleUserMenu() {
+  const menu = document.getElementById('userMenu');
+  const userButton = document.getElementById('loggedUser');
+  const isOpen = menu.classList.toggle('is-open');
+  userButton.setAttribute('aria-expanded', String(isOpen));
+}
+
+function closeUserMenu() {
+  const menu = document.getElementById('userMenu');
+  const userButton = document.getElementById('loggedUser');
+
+  if (!menu) return;
+
+  menu.classList.remove('is-open');
+
+  if (userButton) {
+    userButton.setAttribute('aria-expanded', 'false');
+  }
+}
+
+async function logout() {
+  try {
+    await fetch('/api/logout', {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+  } catch {}
+
+  window.location.href = LOGIN_URL;
+}
+
+function isTypingTarget(target) {
+  if (!target) return false;
+
+  const tag = String(target.tagName || '').toLowerCase();
+
+  return (
+    tag === 'input' ||
+    tag === 'textarea' ||
+    tag === 'select' ||
+    target.isContentEditable
+  );
+}
+
+function isBackdropOpen(id) {
+  const el = document.getElementById(id);
+  return Boolean(el && el.classList.contains('is-open'));
+}
+
+function handleGlobalHotkeys(event) {
+  if (event.ctrlKey || event.altKey || event.metaKey) return;
+  if (isTypingTarget(event.target)) return;
+
+  const key = event.key.toLowerCase();
+
+  if (key === 'n') {
+    event.preventDefault();
+    closeContextMenu();
+    closeUserMenu();
+    openModal();
+    return;
+  }
+
+  if (event.key === 'Delete') {
+    event.preventDefault();
+
+    if (!isBackdropOpen('detailBackdrop') || !getSelectedTicket()) {
+      notify('Abra um chamado para excluir com DEL.');
+      return;
+    }
+
+    deleteSelectedTicket();
+  }
+}
+
+function runTests() {
+  console.assert(getStatusInfo('suporte').nome === 'Aguardando suporte', 'Teste status suporte falhou');
+  console.assert(getStatusInfo('pendente').nome === 'Pendente - Conferir descrição', 'Teste status pendente falhou');
+  console.assert(escapeHtml('<x>') === '&lt;x&gt;', 'Teste escapeHtml falhou');
+  console.assert(sanitizeText('  a   b  ', 20) === 'a b', 'Teste sanitizeText falhou');
+  console.assert(isValidStatus('hack') === false, 'Teste status inválido falhou');
+  console.assert(normalizeTicket({ destacado: true }).destacado === true, 'Teste destacado falhou');
+  console.assert(getCompletedByText({ status: 'concluido', concluido_por_nome: 'TIMC1' }).includes('TIMC1'), 'Teste concluido por falhou');
+  console.assert(getStatusPriority('pendente') < getStatusPriority('concluido'), 'Teste prioridade pendente falhou');
+  console.assert(getStatusPriority('suporte') < getStatusPriority('concluido'), 'Teste prioridade suporte falhou');
+  console.assert(getStatusPriority('andamento') < getStatusPriority('concluido'), 'Teste prioridade andamento falhou');
+  console.assert(getStatusStyle('concluido').includes('#39d98a'), 'Teste cor status falhou');
+  console.assert(normalizeSearchValue('ÁÉÍ') === 'aei', 'Teste normalizeSearchValue falhou');
+
+  const originalUserForAdminRoleTest = currentUser;
+  currentUser = { role: 'Admin' };
+  console.assert(isAdminUser() === true, 'Teste admin role falhou');
+  currentUser = originalUserForAdminRoleTest;
+
+  console.assert(inputDateToBrDate('2026-05-09') === '09/05/2026', 'Teste data input falhou');
+  console.assert(brDateToInputDate('09/05/2026') === '2026-05-09', 'Teste data BR falhou');
+  console.assert(isTypingTarget(document.createElement('input')) === true, 'Teste hotkey typing target falhou');
+  console.assert(normalizeSearchValue('09/05/2026').includes('09'), 'Teste busca por data falhou');
+  console.assert(typeof clearSearchControls === 'function', 'Teste clearSearchControls falhou');
+  console.assert(typeof configureSearchMode === 'function', 'Teste configureSearchMode falhou');
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await requireSession();
+
+  await loadStatuses();
+  configureSearchMode();
+
+  tickets = loadCachedTickets();
+  sortTickets();
+  render();
+
+  await loadTicketsFromServer();
+  setupRealtime();
+
+  document.getElementById('loggedUser').addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleUserMenu();
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    logout();
+  });
+
+  document.getElementById('adminPanelBtn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    openAdminPanel();
+  });
+
+  document.getElementById('closeAdminPanelBtn').addEventListener('click', closeAdminPanel);
+  document.getElementById('manageUsersBtn').addEventListener('click', openUserManage);
+  document.getElementById('manageTicketsBtn').addEventListener('click', openTicketExport);
+  document.getElementById('closeTicketExportBtn').addEventListener('click', closeTicketExport);
+  document.getElementById('exportAllTicketsBtn').addEventListener('click', () => exportTickets(false));
+  document.getElementById('exportFilteredTicketsBtn').addEventListener('click', () => exportTickets(true));
+  document.getElementById('closeUserManageBtn').addEventListener('click', closeUserManage);
+  document.getElementById('saveNewUserBtn').addEventListener('click', createAdminUser);
+  document.getElementById('cancelUserDeleteBtn').addEventListener('click', closeUserDeleteConfirm);
+  document.getElementById('confirmUserDeleteBtn').addEventListener('click', confirmRemoveUser);
+  document.getElementById('newUserPassword').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') createAdminUser();
+    if (event.key === 'Escape') closeUserManage();
+  });
+
+  document.getElementById('userRemoveList').addEventListener('click', (event) => {
+    const btn = event.target.closest('.user-remove-btn');
+    if (!btn) return;
+    askRemoveUser(btn.dataset.userId);
+  });
+
+  document.getElementById('searchBtn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleSearch();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', () => {
+    searchOpen = true;
+    syncSearchUi();
+    render();
+  });
+
+  document.getElementById('searchFilter').addEventListener('change', () => {
+    searchOpen = true;
+    configureSearchMode();
+    syncSearchUi();
+    render();
+
+    const filter = document.getElementById('searchFilter').value;
+
+    if (filter === 'status' || filter === 'destacado') {
+      document.getElementById('searchPresetSelect')?.focus();
+      return;
+    }
+
+    if (filter === 'data') {
+      document.getElementById('searchDateInput')?.focus();
+      return;
+    }
+
+    document.getElementById('searchInput').focus();
+  });
+
+  document.getElementById('searchInput').addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      clearSearchControls();
+    }
+  });
+
+  document.getElementById('statusManagerBtn').addEventListener('click', openStatusManager);
+  document.getElementById('cancelStatusManagerBtn').addEventListener('click', closeStatusManager);
+  document.getElementById('listStatusesBtn').addEventListener('click', openStatusList);
+  document.getElementById('manageStatusesBtn').addEventListener('click', openStatusManage);
+  document.getElementById('closeStatusListBtn').addEventListener('click', closeStatusList);
+  document.getElementById('closeStatusManageBtn').addEventListener('click', closeStatusManage);
+  document.getElementById('saveNewStatusBtn').addEventListener('click', addCustomStatus);
+  document.getElementById('cancelStatusDeleteBtn').addEventListener('click', closeStatusDeleteConfirm);
+  document.getElementById('confirmStatusDeleteBtn').addEventListener('click', confirmRemoveStatus);
+  document.getElementById('newStatusColor').addEventListener('input', (event) => {
+    document.getElementById('newStatusColorText').textContent = event.target.value;
+  });
+  document.getElementById('statusRemoveList').addEventListener('click', (event) => {
+    const btn = event.target.closest('.status-remove-btn');
+    if (!btn) return;
+    askRemoveStatus(btn.dataset.statusCode);
+  });
+
+  document.getElementById('addTicketBtn').addEventListener('click', openModal);
+  document.getElementById('cancelAddBtn').addEventListener('click', closeModal);
+  document.getElementById('saveAddBtn').addEventListener('click', addTicket);
+
+  document.getElementById('deleteMenuBtn').addEventListener('click', deleteSelectedTicket);
+  document.getElementById('editTitleMenuBtn').addEventListener('click', openEditTitleModal);
+  document.getElementById('editRequesterMenuBtn').addEventListener('click', openEditRequesterModal);
+  document.getElementById('editDescriptionMenuBtn').addEventListener('click', openEditDescriptionModal);
+  document.getElementById('editDateMenuBtn').addEventListener('click', openEditDateModal);
+  document.getElementById('changeStatusBtn').addEventListener('click', openStatusChangeModal);
+  document.getElementById('toggleHighlightBtn').addEventListener('click', toggleSelectedHighlight);
+
+  document.getElementById('cancelEditTitleBtn').addEventListener('click', closeEditTitleModal);
+  document.getElementById('saveEditTitleBtn').addEventListener('click', saveEditedTitle);
+  document.getElementById('cancelEditRequesterBtn').addEventListener('click', closeEditRequesterModal);
+  document.getElementById('saveEditRequesterBtn').addEventListener('click', saveEditedRequester);
+  document.getElementById('cancelEditDescriptionBtn').addEventListener('click', closeEditDescriptionModal);
+  document.getElementById('saveEditDescriptionBtn').addEventListener('click', saveEditedDescription);
+  document.getElementById('cancelEditDateBtn').addEventListener('click', closeEditDateModal);
+  document.getElementById('saveEditDateBtn').addEventListener('click', saveEditedDate);
+
+  document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteConfirm);
+  document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteTicket);
+  document.getElementById('cancelStatusChangeBtn').addEventListener('click', closeStatusChangeModal);
+  document.getElementById('saveStatusChangeBtn').addEventListener('click', saveStatusChange);
+
+  document.getElementById('doneCards').addEventListener('click', (event) => {
+    const card = event.target.closest('.card');
+    if (card) openDetail(card.dataset.id);
+  });
+
+  document.getElementById('doneCards').addEventListener('contextmenu', (event) => {
+    const card = event.target.closest('.card');
+    if (card) openContextMenu(event, card.dataset.id);
+  });
+
+  document.getElementById('detailBackdrop').addEventListener('click', closeDetail);
+  document.getElementById('detailModal').addEventListener('click', (event) => event.stopPropagation());
+
+  addBackdropClose('statusManagerBackdrop', closeStatusManager);
+  addBackdropClose('statusListBackdrop', closeStatusList);
+  addBackdropClose('statusManageBackdrop', closeStatusManage);
+  addBackdropClose('statusDeleteConfirmBackdrop', closeStatusDeleteConfirm);
+  addBackdropClose('adminPanelBackdrop', closeAdminPanel);
+  addBackdropClose('ticketExportBackdrop', closeTicketExport);
+  addBackdropClose('userManageBackdrop', closeUserManage);
+  addBackdropClose('userDeleteConfirmBackdrop', closeUserDeleteConfirm);
+  addBackdropClose('modalBackdrop', closeModal);
+  addBackdropClose('editTitleBackdrop', closeEditTitleModal);
+  addBackdropClose('editRequesterBackdrop', closeEditRequesterModal);
+  addBackdropClose('editDescriptionBackdrop', closeEditDescriptionModal);
+  addBackdropClose('editDateBackdrop', closeEditDateModal);
+  addBackdropClose('deleteConfirmBackdrop', closeDeleteConfirm);
+  addBackdropClose('statusChangeBackdrop', closeStatusChangeModal);
+
+  document.addEventListener('click', () => {
+    closeContextMenu();
+    closeUserMenu();
+  });
+
+  document.addEventListener('keydown', handleGlobalHotkeys);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeContextMenu();
+      closeUserMenu();
+      closeDetail();
+      closeModal();
+      closeEditTitleModal();
+      closeEditRequesterModal();
+      closeEditDescriptionModal();
+      closeEditDateModal();
+      closeDeleteConfirm();
+      closeStatusChangeModal();
+      closeStatusManager();
+      closeStatusList();
+      closeStatusManage();
+      closeStatusDeleteConfirm();
+      closeAdminPanel();
+      closeTicketExport();
+      closeUserManage();
+      closeUserDeleteConfirm();
+      clearSearchControls();
+    }
+  });
+
+  document.getElementById('editTitleInput').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveEditedTitle();
+    if (event.key === 'Escape') closeEditTitleModal();
+  });
+
+  document.getElementById('editRequesterInput').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveEditedRequester();
+    if (event.key === 'Escape') closeEditRequesterModal();
+  });
+
+  document.getElementById('editDescriptionInput').addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeEditDescriptionModal();
+    if (event.key === 'Enter' && event.ctrlKey) saveEditedDescription();
+  });
+
+  document.getElementById('editDateInput').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveEditedDate();
+    if (event.key === 'Escape') closeEditDateModal();
+  });
+
+  document.getElementById('statusChangeSelect').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveStatusChange();
+    if (event.key === 'Escape') closeStatusChangeModal();
+  });
+
+  runTests();
+});
